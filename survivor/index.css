@@ -25,6 +25,12 @@ button {
 button:focus {
     background-color: #660000;
 }
+.buttonHolder{
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+}
 
 .progressBar {
     position: absolute;
@@ -55,6 +61,12 @@ button:focus {
     border-style: dashed;
     border-color: #5555;
     border-width: 3px;
+}
+.skillCheckBtn{
+   
+    width: 300px;
+    height: 300px;
+    border-radius: 300px;
 }
 
 .generatorControl {

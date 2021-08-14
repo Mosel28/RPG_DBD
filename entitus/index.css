@@ -5,9 +5,12 @@ body {
 
 .root {}
 
+
+
 .survivorStateBoard {
     position: absolute;
     left: 0%;
+    top: 0%;
     right: 0%;
     height: 25%;
     border-style: dashed;
@@ -48,10 +51,15 @@ body {
     border-width: 3px;
 }
 
+
 h1 {
     margin: 20px;
     left: 40px;
     color: white
+}
+h3{
+    margin: 10px;
+    color: #555555;
 }
 
 button {
@@ -62,9 +70,67 @@ button {
     border-radius: 30px;
     border-style: dotted;
     color: white;
-    font-size: xx-large;
+    font-size: x-large;
 }
 
 button:focus {
     background-color: #660000;
+}
+
+.playerCard{
+    margin: 10px;
+    color: #003300;
+    position: relative;
+    width: 150px;
+    height: 100px;
+}
+.playerCardHooked{
+    margin: 10px;
+    color: #660000;
+    position: relative;
+    width: 150px;
+    height: 100px;
+}
+.playerCardHookedOnce{
+    margin: 10px;
+    color: #664400;
+    position: relative;
+    width: 150px;
+    height: 100px;
+}
+.playerCardHookedSecond{
+    margin: 10px;
+    color: #331100;
+    position: relative;
+    width: 150px;
+    height: 100px;
+}
+.playerCardSacrificed{
+    margin: 10px;
+    color: #050505;
+    position: relative;
+    width: 150px;
+    height: 100px;
+}
+
+
+
+.generatorView{
+    margin: 10px;
+    width: 100px;
+    height: 100px;  
+    background-color: #440000;
+}
+.generatorProgress{
+    margin: 10px;
+    width: 100px;
+    height: 100px;  
+    background-color: #444400;
+}
+.generatorDone{
+    margin: 10px;
+    width: 100px;
+    height: 100px;  
+    background-color: #004400;
+
 }

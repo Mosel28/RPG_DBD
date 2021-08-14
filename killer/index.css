@@ -6,7 +6,7 @@ body {
 h1 {
     margin: 20px;
     left: 40px;
-    color: white
+    color: #990000
 }
 
 .root {
@@ -24,6 +24,7 @@ h1 {
 
 .eventBoard {
     position: absolute;
+    top: 0%;
     left: 0%;
     right: 0%;
     height: 25%;
@@ -52,4 +53,46 @@ h1 {
     border-style: dashed;
     border-color: #5555;
     border-width: 3px;
+}
+
+
+.progressBar {
+    position: absolute;
+    left: 10%;
+    width: 80%;
+    height: 20px;
+    bottom: 8%;
+    background-color: #660000;
+}
+
+.playerCard{
+    color: #660000;
+    position: relative;
+    width: 150px;
+    height: 100px;
+}
+
+
+.notification{
+    color: #660000;
+    position: relative;
+    width: 50%;
+    height: 100px;
+}
+
+button {
+    width: 40%;
+    height: 50%;
+    left: 30%;
+    right: 30%;
+    position: absolute;
+    background-color: #000000;
+    border-radius: 30px;
+    border-style: dotted;
+    color: white;
+    font-size: xx-large;
+}
+
+button:focus {
+    background-color: #660000;
 }

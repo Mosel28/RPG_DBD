@@ -21,15 +21,23 @@
         <div class="skillcheck">
             <!--Skillchecks will must be done here-->
             <h1>Skillchecks</h1>
+            <h1 id="nudge"></h1>
+            <h1 id="startLat"></h1>
+            <h1 id="startLon"></h1>
+            <div class="buttonHolder">
+                <Button id="skillCheckBtn" class="skillCheckBtn" onclick="playSoundSkillCheck()">Skillcheck</Button>
+            </div>
+            
         </div>
 
         <div class="generatorControl">
             <!--Doing the generator, or opening the gate-->
             <h1>Generator Task</h1>
             <div class="progressBar" id="progressBar"></div>
-            <Button>Repair</Button>
+            <Button id="btnRepair" onclick="playSoundSkillCheck()">Repair</Button>
         </div>
-
+        <!--TEST AREA-->
+       
     </div>
     <script src="https://unpkg.com/vue">
     </script>
@@ -38,6 +46,7 @@
             el: '#root'
         })
     </script>
+    <script src="./survivor.js"></script>
 </body>
 
 </html>
