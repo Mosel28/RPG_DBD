@@ -1,0 +1,61 @@
+.root {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    bottom: 0%;
+    background-color: #000000;
+    width: 100%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.survivorStateBoard {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.generatorStateBoard {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 25%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.hookStateBoard {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 50%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.controlls {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 75%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+h1 {
+    margin: 20px;
+    left: 40px;
+    color: white
+}

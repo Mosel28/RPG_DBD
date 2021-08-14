@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <title>Survivor</title>
+</head>
+
+<body>
+
+    <div class="app" id="root">
+
+        <div class="eventBoard">
+            <!--(Notifications) Player hooked, (Terror Radius), Gates open, your own State (dead on hook f.E.)-->
+            <h1>Eve</h1>
+        </div>
+
+        <div class="skillcheck">
+            <!--Skillchecks will must be done here-->
+        </div>
+
+        <div class="generatorControl">
+            <!--Doing the generator, or opening the gate-->
+        </div>
+
+    </div>
+    <script src="https://unpkg.com/vue">
+    </script>
+    <script>
+        window.vue = new Vue({
+            el: '#root'
+        })
+    </script>
+</body>
+
+</html>

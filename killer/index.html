@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <title>Killerboard</title>
+</head>
+
+<body>
+    <div class="app" id="root">
+
+        <div class="eventBoard">
+            <!--(Notifications) Player unhooked, failing Skillcheck, gates open-->
+            <h1>Eventboard</h1>
+        </div>
+
+        <div class="hookControll">
+            <!--Report hooking of player (Entituts and Death Timer need to know this)-->
+            <h1>Hook Control</h1>
+        </div>
+
+        <div class="generatorBreakControll">
+            <!--Breaking the generator-->
+            <h1>Generator Control</h1>
+        </div>
+
+    </div>
+
+
+    <script src="https://unpkg.com/vue">
+    </script>
+    <script>
+        window.vue = new Vue({
+            el: '#root'
+        })
+    </script>
+</body>
+
+</html>

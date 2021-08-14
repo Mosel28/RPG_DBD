@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <title>Entitus</title>
+</head>
+
+
+<!-- This Page is for the Entitus. -->
+
+<body>
+
+    <div class="root" id="root">
+
+        <div class="survivorStateBoard">
+            <!-- State of each survivor (normal, first hooked, second hooked, dead on hook)-->
+            <h1>Survivor State</h1>
+        </div>
+
+        <div class="generatorStateBoard">
+            <!-- Progress of each generator + Gates -->
+            <h1>Generator State</h1>
+        </div>
+
+        <div class="hookStateBoard">
+            <!-- Which hook is in use? When must the Entitus Kill the pres?-->
+            <h1>Hook State</h1>
+        </div>
+
+        <div class="controlls">
+            <!-- reset game. Kick player. Whatever makes sense -->
+            <h1>Controls</h1>
+
+        </div>
+
+    </div>
+
+
+    <script src="https://unpkg.com/vue">
+    </script>
+    <script>
+        window.vue = new Vue({
+            el: '#root'
+        })
+    </script>
+</body>
+
+</html>
