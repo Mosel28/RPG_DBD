@@ -7,3 +7,62 @@ h1 {
     left: 40px;
     color: white
 }
+
+button {
+    width: 40%;
+    height: 50%;
+    left: 30%;
+    right: 30%;
+    position: absolute;
+    background-color: #000000;
+    border-radius: 30px;
+    border-style: dotted;
+    color: white;
+    font-size: xx-large;
+}
+
+button:focus {
+    background-color: #660000;
+}
+
+.progressBar {
+    position: absolute;
+    left: 10%;
+    width: 80%;
+    height: 20px;
+    bottom: 8%;
+    background-color: green;
+}
+
+.eventBoard {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.skillcheck {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 25%;
+    height: 50%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.generatorControl {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 75%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}

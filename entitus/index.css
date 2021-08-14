@@ -59,3 +59,18 @@ h1 {
     left: 40px;
     color: white
 }
+
+button {
+    margin: 40px;
+    width: 100px;
+    height: 100px;
+    background-color: #000000;
+    border-radius: 30px;
+    border-style: dotted;
+    color: white;
+    font-size: xx-large;
+}
+
+button:focus {
+    background-color: #660000;
+}
