@@ -18,6 +18,8 @@ let skillcheck = {
     active: false, //finished?
 }
 let activeSkillcheck;
+let skillCheckPointer = document.getElementById("skillCheckPointer");
+let skillCheckSucessArea = document.getElementById("skillCheckSucessArea");
 
 
 /*
@@ -142,10 +144,8 @@ function updateCompass(latitude, longitude) {
  * Increases and decreases the volume of the terror radius sound
  */
 function updateTerrorRadius(distance) {
-
     let volume = Math.floor(1 / distance * 12) / 10 - .2; //maybe a bad idea
     console.warn("Terrorradius not implemented (distance, volume)", distance, volume);
-
 }
 
 /*
@@ -154,8 +154,9 @@ Skill check stuff
 /**
  * @param difficulty Number between 1 and 3
  */
-function initSkillCheck(difficulty) {
+function initSkillCheck(difficulty = 2) {
 
+    console.log("init Skillcheck ")
     if (difficulty > 3 || difficulty < 1) {
         console.exception("Wrong Skill Check Init Parameter! Read Commentary!");
         return;
@@ -166,27 +167,72 @@ function initSkillCheck(difficulty) {
             return;
     let successAreaSize = 10 + 10 / difficulty;
 
-    skillcheck.progress = 0;
+    skillcheck.progress = -50;
     skillcheck.posOkStart = Math.random() * (100 - successAreaSize);
-    skillcheck.posOkEnd = posOKStart + successAreaSize;
+    skillcheck.posOkEnd = skillcheck.posOkStart + successAreaSize;
     skillcheck.timeStep = 0.5 + 2 / difficulty;
     skillcheck.active = true;
 
+    // skillCheckPointer.style.backgroundColor = "green"
+    console.log(skillcheck)
+    //Init UI Skill check here
+    //skillCheckSucessArea
+    let c = document.getElementById("skillCheckSucessArea");
+    let ctx = c.getContext("2d");
+
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.beginPath();
+    ctx.arc(150, 150, 150, 2 * Math.PI / 100 * skillcheck.posOkStart - Math.PI / 2, 2 * Math.PI / 100 * skillcheck.posOkEnd - Math.PI / 2);
+    ctx.strokeStyle = '#CC4400';
+    ctx.lineWidth = 10
+    ctx.stroke();
+    skillCheckPointer.style.visibility = "visible";
+
     function processSkillcheck() {
         if (!skillcheck.active) clearInterval(activeSkillcheck);
-
         skillcheck.progress = skillcheck.progress + skillcheck.timeStep;
 
+        console.log("ActiveSkillCheck")
+        //Update UI Skill check here
+        let rotation = 360 / 100 * skillcheck.progress
+        if (skillcheck.progress > 0){
+            skillCheckSucessArea.style.visibility = 'visible';
+            skillCheckPointer.style.transform = 'rotate(' + rotation + 'deg)';
+        }
 
-        if (skillcheck.progress > 100)
-            skillcheck.active = false;
 
+        if (skillcheck.progress > 100) {
+            // skillCheckPointer.style.backgroundColor = "red"
+            stopSkillCheck()
+            playSoundSkillCheckFail();
+        }
     }
 
-    activeSkillcheck = setInterval(processSkillcheck, 20);
 
+    activeSkillcheck = setInterval(processSkillcheck, 20);
 }
 
+function stopSkillCheck() {
+    clearInterval(activeSkillcheck)
+    skillcheck.active = false;
+    skillCheckSucessArea.style.visibility = 'hidden'
+    skillCheckPointer.style.visibility = "hidden";
+}
+
+function clickSkillCheck() {
+    if (!skillcheck.active) return;
+    if (skillcheck.progress >= skillcheck.posOkStart && skillcheck.progress <= skillcheck.posOkEnd) {
+        console.log("Skill check successful");
+        stopSkillCheck();
+        playSoundSkillCheckSuccess();
+        //  skillCheckPointer.style.backgroundColor = "blue"
+    } else {
+        console.log("Skill check unsuccessful")
+        stopSkillCheck();
+        playSoundSkillCheckFail();
+        //  skillCheckPointer.style.backgroundColor = "red"
+    }
+}
 
 //TESTFUNKTIONEN
 
@@ -213,3 +259,5 @@ if ("geolocation" in navigator) {
 } else {
     console.warn("GPS Funktioniert NICHT!")
 }
+
+setInterval(initSkillCheck, 5000);

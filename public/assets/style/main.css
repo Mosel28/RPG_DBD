@@ -327,7 +327,7 @@ footer {
 }
 
 html {
-    background: url(/assets/img/bild.jpg) no-repeat center center fixed;
+
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -379,7 +379,17 @@ html {
 
     width: 300px;
     height: 300px;
+}
+.skillCheckPointer{
+    position: absolute;
+    top: 15%;
+    width: 300px;
+    height: 300px;
+    border-color: #5555;
+    border-style: dot-dash;
+    border-width: 3px;
     border-radius: 300px;
+    visibility: hidden;
 }
 
 .generatorControl {

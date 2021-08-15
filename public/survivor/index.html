@@ -26,7 +26,11 @@
             <h1 id="startLat"></h1>
             <h1 id="startLon"></h1>
             <div class="buttonHolder">
-                <Button id="skillCheckBtn" class="skillCheckBtn" onclick="playSoundSkillCheck()">Skillcheck</Button>
+                <canvas class="skillCheckPointer"  width="300" height="300" id="skillCheckSucessArea"></canvas>
+                <input type="image" onclick="clickSkillCheck()" src="/assets/img/skillcheckPointer.png" class="skillCheckPointer" id="skillCheckPointer"/>
+
+                <!-- <Button id="skillCheckBtn" class="skillCheckBtn" onclick="clickSkillCheck()">Skillcheck</Button>
+               -->
             </div>
             
         </div>
