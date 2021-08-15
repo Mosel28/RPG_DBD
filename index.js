@@ -1,8 +1,10 @@
 
 const express = require('express');
 const app = express();
+var expressWs = require('express-ws')(app);
 const dotenv = require("dotenv");
 const database = require("./middleware/database");
+const api = require("./router/app");
 
 console.log(" ▄█     █▄     ▄████████    ▄████████ ▀█████████▄     ▄████████ \n" +
     "███     ███   ███    ███   ███    ███   ███    ███   ███    ███ \n" +
@@ -35,6 +37,8 @@ dotenv.config();
 app.listen(5011, () => console.log('listening on port ' + 5011));
 app.use(express.static('public'));
 app.use(express.json({ limit: '2mb' }));
+app.use(api);
+app.ws = expressWs;
 database.connect();
 
 console.log("Ready for action!")
