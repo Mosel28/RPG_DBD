@@ -5,14 +5,22 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 //Models
-const User = require("../models/User")
+const User = require("../models/User");
+
+const ExitGate = require("../models/game/obstacles/ExitGate");
+const Generator = require("../models/game/obstacles/Generator");
+const Hook = require("../models/game/obstacles/Hook");
+const Player = require("../models/game/Player");
+const Session = require("../models/game/Session");
+
+var authCons = [];
 
 router.ws('/',  function (ws, req) {
     ws.json = function (data){
         ws.send(JSON.stringify(data));
     }
 
-    ws.on('message',  function (data) {
+    ws.on('message', async function (data) {
         let msg;
         try {
             msg = JSON.parse(data);
@@ -29,14 +37,54 @@ router.ws('/',  function (ws, req) {
                 register(ws, msg);
                 break;
 
+            case "auth":
+                for (let i = 0; i < authCons.length; i++) {
+                    if(authCons[i] == ws){
+                        //A authenticated connection is already established
+                        return ws.json({req: "authstatus", status: 4011});
+                    }
+                }
+                const verified = jwt.verify(msg.token, process.env.TOKEN_SECRET);
+                if(!verified) return ws.json({req: "authstatus", status: 401});
+                const time = new Date(verified.ctime);
+                const expireTime = time.setHours(time.getHours() + 48);
+                const now = new Date();
+                if (now > expireTime) return ws.json({req: "authstatus", status: 401});
+                const u = await User.findOne({ _id: verified._id });
+                if (!u) return ws.json({req: "authstatus", status: 401});
+                ws.user = u;
+                ws.json({req: "authstatus", status: 200});
+                authCons.push(ws);
+                for (let i = 0; i < authCons.length; i++) {
+                    console.log(authCons[i].user._id);
+                }
+                break;
+
             default:
                 console.log("Unknown");
         }
     });
+
+    ws.on('close',  function (data) {
+        for (let i = 0; i < authCons.length; i++) {
+            if(authCons[i] == ws){
+                authCons.splice(i, 1);
+                break;
+            }
+        }
+
+        for (let i = 0; i < authCons.length; i++) {
+            console.log(authCons[i].user._id);
+        }
+    });
+
+    ws.on('error',  function (data) {
+        ws.close();
+    });
 });
 
 async function createGame(ws, msg){
-    
+
 }
 
 async function login(ws, message) {

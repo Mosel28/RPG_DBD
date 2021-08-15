@@ -18,7 +18,12 @@ var reg = new Vue({
 
                 case "done":
                     saveToken(msg.token);
-                    window.location.replace("/");
+                    //window.location.replace("/");
+                    ws.json({req: "auth", token: msg.token});
+                    break;
+
+                case "authstatus":
+                    console.log(msg.status);
                     break;
             }
         },
