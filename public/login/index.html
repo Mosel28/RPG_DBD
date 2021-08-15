@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/assets/style/main.css">
+  <title>Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  <script type="text/javascript" src="/assets/script/auth.js"></script>
+</head>
+
+<body>
+
+<div id="login">
+  <input type="username" placeholder="Username" name="Username" v-model="username">
+  <input type="password" placeholder="Password" name="Password" v-model="password">
+  <button type="button" @click="login">Login</button>
+  <div class="advice" v-if="message.length > 1">
+    <a>{{message}}</a>
+  </div>
+</div>
+
+<script src="mainvue.js"></script>
+</body>
+
+</html>

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="/assets/style/main.css">
     <title>Entitus</title>
 </head>
 
@@ -19,7 +19,7 @@
         <div class="survivorStateBoard">
             <!-- State of each survivor (normal, first hooked, second hooked, dead on hook)-->
             <h1>Survivor State</h1>
-            
+
             <!--EXAMPLECODE; REPLACE WITH VUE-->
             <button class="playerCardSacrificed">Crazybrain</button>
             <button class="playerCardHooked">Nommit</button>
@@ -45,8 +45,17 @@
             <!-- Which hook is in use? When must the Entitus Kill the pres?-->
             <h1>Hook State</h1>
             <!--Examplecode-->
-            <button class="playerCardHooked">Nommit</button>
-            <h3>20 Seconds left</h3>
+            <div class="hookStateCard">
+                <h1 class="playerCardHooked">Nommit</h1>
+                <h3>20 Seconds left</h3>
+                <h3>Hook 1</h3>
+
+            </div>
+            <div class="hookStateCard">
+                <h1 class="playerCardHooked">Mindcollaps</h1>
+                <h3>20 Seconds left</h3>
+                <h3>Hook 3</h3>
+            </div>
         </div>
 
         <div class="controlls">
@@ -65,6 +74,7 @@
             el: '#root'
         })
     </script>
+    <script src="./entitus.js"></script>
 </body>
 
 </html>

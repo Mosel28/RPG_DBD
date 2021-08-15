@@ -10,7 +10,7 @@ if ("geolocation" in navigator) {
 
 
 function playSoundSkillCheck() {
-    playSound("./sounds/SkillCheck.mp3");
+    playSound("/assets/sounds/SkillCheck.mp3");
 }
 
 function playSoundSkillCheckSuccess() {

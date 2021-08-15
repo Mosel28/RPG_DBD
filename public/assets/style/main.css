@@ -1,0 +1,394 @@
+body {
+    background-color: #000000;
+    overflow: hidden;
+}
+
+:root {
+    --color-primary: #1c1c1f;
+    --color-secondary: #202022;
+    --color-tertiary: #1e1e21;
+    --color-glass: rgba(31, 31, 31, 0.6);
+    --color-scrollbar: #7289da;
+
+    --color-bg: #1a1a1c;
+    --color-backdrop: rgba(0, 0, 51, 0.4);
+
+    --button-0: #7289da;
+    --button-0-2: #7289da;
+    --button-0-hover: #7289da;
+    --button-0-2-hover: #7289da;
+
+    --button-decline: #DA7289;
+    --button-decline-2: #DA7289;
+    --button-decline-hover: #DA7289;
+    --button-decline-2-hover: #DA7289;
+
+    --button-accept: #89DA72;
+    --button-accept-2: #89DA72;
+    --button-accept-hover: #89DA72;
+    --button-accept-2-hover: #89DA72;
+
+    --color-headline: #dddddd;
+    --color-shadow: rgba(0, 0, 0, .4);
+    --color-shadow-hover: #36393e;
+    --color-shadow-highlight: rgba(33, 0, 255, 0.3);
+
+    --color-dark: #364C62;
+    --color-light: #F5F5F5;
+    --font-family-primary: "Roboto Mono", monospace;
+    --font-family-secondary: "Rubik Mono One", sans-serif;
+
+    --color-font-primary: #ababab;
+    --color-font-primary-hover: var(--color-font-primary);
+    --color-font-primary-2: var(--color-font-primary);
+    --color-font-primary-hover-2: var(--color-font-primary);
+
+    --color-font-secondary: #ffffff;
+    --color-font-secondary-hover: #ffffff;
+    --color-font-secondary-2: #ffffff;
+    --color-font-secondary-hover-2: #ffffff;
+
+    --color-font-highlight: #7289da;
+    --color-font-highlight-2: #a46ed4;
+    --color-font-highlight-hover: #5d70b1;
+    --color-font-highlight-hover-2: #744c94;
+
+    --td: 100ms;
+    --te: cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.advice {
+    transition: all 250ms ease;
+    background-color: var(--color-primary);
+    margin: auto;
+    margin-top: 3em;
+    box-shadow: 0 2px 30px 0 rgba(0, 0, 0, .4);
+    border-radius: 6px;
+    width: fit-content;
+    text-align: center;
+    padding: 2rem;
+}
+
+.advice:hover {
+    border-radius: 2rem;
+    box-shadow: 0 2px 30px 0 var(--color-shadow-hover);
+}
+
+.advice a {
+    text-decoration-style: solid;
+    background: linear-gradient(150deg, var(--color-font-highlight), var(--color-font-highlight-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+}
+
+.survivorStateBoard {
+    position: absolute;
+    left: 0%;
+    top: 0%;
+    right: 0%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.generatorStateBoard {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 25%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.hookStateBoard {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 50%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+    margin: 0;
+}
+
+.controlls {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 75%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+
+h1 {
+    margin: 20px;
+    left: 40px;
+    color: white
+}
+h3{
+    margin: 10px;
+    color: #555555;
+}
+
+button {
+    display: inline-block;
+    margin: 30px;
+    width: 100px;
+    height: 100px;
+    background-color: #000000;
+    border-radius: 30px;
+    border-style: dotted;
+    color: white;
+    font-size: x-large;
+}
+
+button:focus {
+    background-color: #660000;
+}
+
+.playerCard{
+    font-size: small;
+    margin: 10px;
+    color: #003300;
+    position: relative;
+    width: 20%;
+    height: 20%;
+}
+.playerCardHooked{
+    font-size: small;
+    margin: 10px;
+    color: #660000;
+    position: relative;
+    width: 20%;
+    height: 20%;
+}
+.playerCardHookedOnce{
+    font-size: small;
+    margin: 10px;
+    color: #664400;
+    position: relative;
+    width: 20%;
+    height: 20%;
+}
+.playerCardHookedSecond{
+    font-size: small;
+    margin: 10px;
+    color: #331100;
+    position: relative;
+    width: 20%;
+    height: 20%;
+}
+.playerCardSacrificed{
+    font-size: small;
+    margin: 10px;
+    color: #050505;
+    position: relative;
+    width: 20%;
+    height: 20%;
+}
+
+.generatorView{
+    margin: 0;
+    width: 10%;
+    height: 100px;
+    background-color: #440000;
+}
+.generatorProgress{
+    margin: 0;
+    width: 10%;
+    height: 100px;
+    background-color: #444400;
+}
+.generatorDone{
+    margin: 0;
+    width: 10%;
+    height: 100px;
+    background-color: #004400;
+}
+.hookStateCard{
+    display: inline-block;
+    width: max-content;
+    margin: 0;
+    vertical-align: middle;
+}
+
+.root {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    bottom: 0%;
+    background-color: #000000;
+    width: 100%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.eventBoard {
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    right: 0%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.hookControll {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 25%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.generatorBreakControll {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 50%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+
+.progressBar {
+    position: absolute;
+    left: 10%;
+    width: 80%;
+    height: 20px;
+    bottom: 8%;
+    background-color: #660000;
+}
+
+.playerCard{
+    color: #660000;
+    position: relative;
+    width: 150px;
+    height: 100px;
+}
+
+
+.notification{
+    color: #660000;
+    position: relative;
+    width: 50%;
+    height: 100px;
+}
+
+h3 {
+    margin: 20px;
+    left: 40px;
+    color: #992222;
+}
+
+a {
+    margin: 50px;
+    color: #CC2222;
+    font-size: x-large;
+    font-weight: bold;
+    text-align: center;
+}
+
+a:visited {
+    color: #992222;
+    font-size: x-large;
+    text-align: center;
+}
+
+.Title {
+    color: #992222;
+    font-size: 500%;
+    text-align: center;
+}
+
+footer {
+    color: #992222;
+    background-color: #111111;
+    bottom: 0%;
+    left: 0%;
+    right: 0%;
+    position: absolute;
+}
+
+html {
+    background: url(/assets/img/bild.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.generatorView{
+
+}
+
+.buttonHolder{
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+}
+
+.progressBar {
+    position: absolute;
+    left: 10%;
+    width: 80%;
+    height: 20px;
+    bottom: 8%;
+    background-color: green;
+}
+
+.eventBoard {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 0%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.skillcheck {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 25%;
+    height: 50%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+.skillCheckBtn{
+
+    width: 300px;
+    height: 300px;
+    border-radius: 300px;
+}
+
+.generatorControl {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 75%;
+    height: 25%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}

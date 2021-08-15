@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/style/main.css">
+    <title>Register</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script type="text/javascript" src="/assets/script/auth.js"></script>
+</head>
+
+<body>
+
+<div id="register">
+    <input type="username" placeholder="Username" name="Username" v-model="username">
+    <input type="password" placeholder="Password" name="Password" v-model="password">
+    <button @click="register()">
+        Register
+    </button>
+    <div class="advice" v-if="message.length > 1">
+        <a>{{message}}</a>
+    </div>
+</div>
+
+<script type="text/javascript" src="mainvue.js"></script>
+</body>
+
+</html>
