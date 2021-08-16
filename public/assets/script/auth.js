@@ -1,6 +1,10 @@
 let ws;
 let handler;
 
+function auth(){
+    ws.json({req: "auth", token: getToken()});
+}
+
 function getToken() {
     return getCookie("auth");
 }
@@ -35,6 +39,7 @@ function createWs(){
 
     ws.onopen = function (event) {
         console.log("Websocket connected");
+        auth();
     }
 
     ws.onclose = function (event) {

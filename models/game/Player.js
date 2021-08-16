@@ -16,7 +16,8 @@ const player = new mongoose.Schema({
     hookState: {
         type: Number,
         default: 0
-    }
+    },
+    user: mongoose.Schema.Types.ObjectId
 });
 
 module.exports = mongoose.model("Player", player);
