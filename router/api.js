@@ -98,7 +98,9 @@ router.ws('/', function (ws, req) {
                 ws.user = u;
                 const player = await Player.findOne({user: u._id});
                 if (player) ws.player = player;
-                ws.json({req: "authstatus", status: 200});
+
+                const isPlayer = await getSession(ws) !== undefined;
+                ws.json({req: "authstatus", status: 200, isPlayer: isPlayer});
                 authCons.push(ws);
                 break;
 
@@ -377,7 +379,7 @@ async function getPlayers(ws) {
 async function sendJsonToAllSessionMembers(ws, msg) {
     const session = await getSession(ws);
     for (let i = 0; i < authCons.length; i++) {
-        if (authCons[i].player !== undefined)
+        if (authCons[i].player != undefined)
             if (authCons[i].player.session.equals(session._id))
                 authCons[i].json(msg);
     }
