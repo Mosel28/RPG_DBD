@@ -31,8 +31,8 @@ function getSocketUrl() {
 
 function connectWs(hand, onReady) {
     handler = hand;
-    ws.onReady = onReady;
     createWs();
+    ws.onReady = onReady;
     return ws;
 }
 
