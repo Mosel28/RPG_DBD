@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/assets/style/main.css">
+    <title>Setup</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script type="text/javascript" src="/assets/script/auth.js"></script>
+</head>
+
+
+<!-- This Page is for the Entitus. -->
+
+<body>
+
+<div class="root" id="entity">
+    <div v-if="ready">
+      <div>
+        <h1>Hooks</h1>
+        <div>
+          <div v-for="hook in game.hooks">
+            <a class="ready" v-if="hook.setup">{{hook.uid}}</a><a class="unready" v-if="!hook.setup">{{hook.uid}}</a>
+            <button v-if="!hook.setup">Setup</button><button @click="removeHook(hook._id)">Remove</button>
+          </div>
+        </div>
+        <button @click="createHook">Create Hook on Location</button>
+      </div>
+        <div>
+            <h1>Generator</h1>
+            <div>
+                <div v-for="gen in game.generators">
+                    <a class="ready" v-if="gen.setup">{{gen.uid}}</a><a class="unready" v-if="!gen.setup">{{gen.uid}}</a>
+                    <button v-if="!gen.setup">Setup</button><button @click="removeGen(gen._id)">Remove</button>
+                </div>
+            </div>
+            <button @click="createGen">Create Generator on Location</button>
+        </div>
+        <div>
+            <h1>Exit Gate</h1>
+            <div>
+                <div v-for="gate in game.exitGates">
+                    <a class="ready" v-if="gate.setup">{{gate.uid}}</a><a class="unready" v-if="!gate.setup">{{gate.uid}}</a>
+                    <button v-if="!gate.setup">Setup</button> <button @click="removeGate(gate._id)">Remove</button>
+                </div>
+            </div>
+            <button @click="createExit">Create Exit on Location</button>
+        </div>
+    </div>
+</div>
+<script src="mainvue.js"></script>
+</body>
+
+</html>

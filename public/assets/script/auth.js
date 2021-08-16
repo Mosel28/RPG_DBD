@@ -1,8 +1,13 @@
 let ws;
 let handler;
+let reconnect = false;
 
 function auth(){
     ws.json({req: "auth", token: getToken()});
+    if(ws.onReady !== undefined)
+        ws.onReady(reconnect);
+
+    reconnect = true;
 }
 
 function getToken() {
@@ -24,8 +29,9 @@ function getSocketUrl() {
     return new_uri;
 }
 
-function connectWs(hand) {
+function connectWs(hand, onReady) {
     handler = hand;
+    ws.onReady = onReady;
     createWs();
     return ws;
 }

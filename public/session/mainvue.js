@@ -14,11 +14,9 @@ var reg = new Vue({
         ws: undefined
     },
     created: async function () {
-        this.ws = connectWs(this.handleMessage);
-
-        setTimeout(function () {
+        this.ws = connectWs(this.handleMessage, function (reconnect){
             reg.ws.json({req: "loadGame"});
-        }, 60);
+        });
     },
     methods: {
         toggleQueue: function () {

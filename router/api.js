@@ -71,6 +71,10 @@ router.ws('/', function (ws, req) {
                 setup(ws, msg);
                 break;
 
+            case "removeObstacle":
+                removeObstacle(ws, msg);
+                break;
+
             case "regTerrorRadius":
                 const job = schedule.scheduleJob({second: .1}, async function () {
                     if (!isAuth(ws)) return job.cancel();
@@ -130,11 +134,35 @@ router.ws('/', function (ws, req) {
     });
 });
 
+async function removeObstacle(ws, msg) {
+    const session = await getSession(ws);
+    switch (msg.type) {
+        case "generator": {
+            const gen = await Generator.findOne({_id: msg.id});
+            await gen.remove();
+        }
+            break;
+
+        case "hook": {
+            const hook = await Hook.findOne({_id: msg.id});
+            await hook.remove();
+        }
+            break;
+
+        case "exitGate": {
+            const exit = await ExitGate.findOne({_id: msg.id});
+            await exit.remove();
+        }
+            break;
+    }
+    await sendJsonToEntity(ws, {req: "reload"}, session._id);
+}
+
 async function setup(ws, msg) {
     const session = await getSession(ws);
     var tk = makeToken(10);
 
-    while (await testUid(tk)){
+    while (await testUid(tk)) {
         tk = makeToken(10);
     }
     switch (msg.type) {
@@ -176,9 +204,10 @@ async function setup(ws, msg) {
         }
             break;
     }
+    await sendJsonToEntity(ws, {req: "reload"}, session._id);
 }
 
-async function testUid(uid){
+async function testUid(uid) {
     const gens = await Generator.find({uid: uid});
     const hooks = await Hook.find({uid: uid});
     const exits = await ExitGate.find({uid: uid});
@@ -246,7 +275,12 @@ async function loadGame(ws, msg) {
         const hooks = await Hook.find({session: session._id});
         const exitGates = await ExitGate.find({session: session._id});
 
-        ws.json({req: "loadGame", game: {players: await getPlayerData(ws), generators: generators, hooks: hooks, exitGates: exitGates}, state: session.state, isEntity: true});
+        ws.json({
+            req: "loadGame",
+            game: {players: await getPlayerData(ws), generators: generators, hooks: hooks, exitGates: exitGates},
+            state: session.state,
+            isEntity: true
+        });
     } else if (getPlayer(ws).isSurvivor) {
         if (session.state == 1) {
             await loadQueueGame(ws, msg, session._id, false);
