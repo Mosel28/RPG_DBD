@@ -4,9 +4,6 @@ let reconnect = false;
 
 function auth(){
     ws.json({req: "auth", token: getToken()});
-    if(ws.onReady !== undefined)
-        ws.onReady(reconnect);
-
     reconnect = true;
 }
 
@@ -62,7 +59,14 @@ function createWs(){
     }
 
     ws.onmessage = async function (event) {
-        handler(JSON.parse(event.data));
+        let data = JSON.parse(event.data);
+
+        if(data.req === "authstatus"){
+            if(data.status === 200)
+                if(ws.onReady !== undefined)
+                    ws.onReady(reconnect);
+        }
+        handler(data);
     }
 
     ws.json = function (data) {
