@@ -14,79 +14,61 @@
 
 <body>
 
-    <div class="root" id="entity">
-        <div v-if="createGameShown">
-            <button @click="createGame">Create Game</button>
-            <a>Or join a game</a>
-            <input type="text" v-model="gameKey">
-            <button @click="join">Join</button>
-        </div>
-        <div v-if="queueShown">
-            <div>
-                <div v-for="player in players">
-                    Name: <a>{{player.name}}</a> <button v-if="isEntity" @click="kickPlayer(player._id)">Kick</button>
-                </div>
-                <div v-if="isEntity">
-                    <div v-for="token in tokens">
-                        <a>{{token}}</a>
+<div class="root" id="entity">
+    <button class="fixedBtn" v-if="!shown" @click="toggleQueue">Queue</button>
+    <div v-if="shown" class="editbox">
+        <div class="ct">
+            <button v-if="!queueShown && !createGameShown || isEntity" class="fixedBtn" @click="toggleQueue">Close</button>
+            <div class="advice" v-if="message.length > 0"><a>{{message}}</a></div>
+            <div v-if="createGameShown">
+                <button @click="createGame">Create Game</button>
+                <a>Or join a game</a>
+                <input type="text" v-model="gameKey">
+                <button @click="join">Join</button>
+            </div>
+            <div v-if="queueShown">
+                <div>
+                    <div v-for="player in players">
+                        Name: <a>{{player.name}}</a>
+                        <button v-if="isEntity" @click="kickPlayer(player._id)">Kick</button>
                     </div>
-                    <button @click="createToken">Create token</button>
+                    <div v-if="isEntity">
+                        <div v-for="token in tokens">
+                            <a>{{token}}</a>
+                        </div>
+                        <button @click="createToken">Create token</button>
+                    </div>
+                    <button @click="quit">Quit</button>
                 </div>
             </div>
         </div>
-        <div v-if="gameShown">
-            <div class="survivorStateBoard">
-                <!-- State of each survivor (normal, first hooked, second hooked, dead on hook)-->
-                <h1>Survivor State</h1>
-
-                <!--EXAMPLECODE; REPLACE WITH VUE-->
-                <button class="playerCardSacrificed">Crazybrain</button>
-                <button class="playerCardHooked">Nommit</button>
-                <button class="playerCardHookedOnce">Mindcollaps</button>
-                <button class="playerCard">Strawberry</button>
-                <button class="playerCardHookedSecond">Mikey</button>
-            </div>
-
-            <div class="generatorStateBoard">
-                <!-- Progress of each generator + Gates -->
-                <h1>Generator State</h1>
-                <!--EXAMPLECODE; REPLACE WITH VUE-->
-                <button class="generatorView">1</button>
-                <button class="generatorProgress">2</button>
-                <button class="generatorView">3</button>
-                <button class="generatorDone">4</button>
-                <button class="generatorDone">5</button>
-                <button class="generatorProgress">6</button>
-                <button class="generatorView">7</button>
-            </div>
-
-            <div class="hookStateBoard">
-                <!-- Which hook is in use? When must the Entitus Kill the pres?-->
-                <h1>Hook State</h1>
-                <!--Examplecode-->
-                <div class="hookStateCard">
-                    <h1 class="playerCardHooked">Nommit</h1>
-                    <h3>20 Seconds left</h3>
-                    <h3>Hook 1</h3>
-
-                </div>
-                <div class="hookStateCard">
-                    <h1 class="playerCardHooked">Mindcollaps</h1>
-                    <h3>20 Seconds left</h3>
-                    <h3>Hook 3</h3>
-                </div>
-            </div>
-
-            <div class="controlls">
-                <!-- reset game. Kick player. Whatever makes sense -->
-                <h1>Controls</h1>
-                <button>reset</button>
-            </div>
-        </div>
-
-
     </div>
-    <script src="mainvue.js"></script>
+    <div v-if="isEntity">
+        <div class="survivorStateBoard">
+            <!-- State of each survivor (normal, first hooked, second hooked, dead on hook)-->
+            <h1>Survivor State</h1>
+        </div>
+
+        <div class="generatorStateBoard">
+            <!-- Progress of each generator + Gates -->
+            <h1>Generator State</h1>
+            <!--EXAMPLECODE; REPLACE WITH VUE-->
+        </div>
+
+        <div class="hookStateBoard">
+            <!-- Which hook is in use? When must the Entitus Kill the pres?-->
+            <h1>Hook State</h1>
+            <!--Examplecode-->
+        </div>
+
+        <div class="controlls">
+            <!-- reset game. Kick player. Whatever makes sense -->
+        </div>
+    </div>
+
+
+</div>
+<script src="mainvue.js"></script>
 </body>
 
 </html>

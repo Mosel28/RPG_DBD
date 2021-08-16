@@ -63,6 +63,14 @@ router.ws('/', function (ws, req) {
                 kickPlayer(ws, msg);
                 break;
 
+            case "quit":
+                quit(ws, msg);
+                break;
+
+            case "setup":
+                setup(ws, msg);
+                break;
+
             case "regTerrorRadius":
                 const job = schedule.scheduleJob({second: .1}, async function () {
                     if (!isAuth(ws)) return job.cancel();
@@ -86,7 +94,7 @@ router.ws('/', function (ws, req) {
                         return ws.json({req: "authstatus", status: 4001});
                     }
                 }
-                if(!msg.token)return ws.json({req: "authstatus", status: 401});
+                if (!msg.token) return ws.json({req: "authstatus", status: 401});
                 const verified = jwt.verify(msg.token, process.env.TOKEN_SECRET);
                 if (!verified) return ws.json({req: "authstatus", status: 401});
                 const time = new Date(verified.ctime);
@@ -122,6 +130,94 @@ router.ws('/', function (ws, req) {
     });
 });
 
+async function setup(ws, msg) {
+    const session = await getSession(ws);
+    var tk = makeToken(10);
+
+    while (await testUid(tk)){
+        tk = makeToken(10);
+    }
+    switch (msg.type) {
+        case "generator": {
+            const gen = new Generator({
+                session: session._id,
+                progress: 0,
+                damaged: false,
+                finished: false,
+                uid: tk,
+                position: msg.position
+            });
+
+            await gen.save();
+
+        }
+            break;
+
+        case "hook": {
+            const hook = new Hook({
+                session: session._id,
+                damaged: false,
+                uid: tk,
+                position: msg.position
+            });
+
+            await hook.save();
+        }
+            break;
+
+        case "exitGate": {
+            const exit = new ExitGate({
+                session: session._id,
+                position: msg.position,
+                uid: tk
+            });
+
+            await exit.save();
+        }
+            break;
+    }
+}
+
+async function testUid(uid){
+    const gens = await Generator.find({uid: uid});
+    const hooks = await Hook.find({uid: uid});
+    const exits = await ExitGate.find({uid: uid});
+
+    return (gens.length > 0 || hooks.length > 0 || exits.length > 0);
+}
+
+async function quit(ws, msg) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (await isEntity(ws))
+        await destroySession(ws);
+    else {
+        const player = await getPlayer(ws);
+        await reloadGame(ws);
+        await player.remove();
+    }
+}
+
+async function destroySession(ws) {
+    const session = await getSession(ws);
+
+    const tokens = await Token.find({session: session._id});
+    const generators = await Generator.find({session: session._id});
+    const hooks = await Hook.find({session: session._id});
+    const players = await Player.find({session: session._id});
+    const exitGates = await ExitGate.find({session: session._id});
+
+    const collec = [tokens, generators, hooks, players, exitGates];
+
+    for (const x of collec) {
+        for (const x1 of x) {
+            await x1.remove();
+        }
+    }
+
+    await reloadGame(ws);
+    await session.remove();
+}
+
 async function kickPlayer(ws, msg) {
     if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
     if (!await isEntity(ws)) return ws.json({req: "authstatus", status: 4011});
@@ -133,8 +229,9 @@ async function kickPlayer(ws, msg) {
     await reloadGame(ws);
 }
 
-async function reloadGame(ws){
-    await sendJsonToAllSessionMembers(ws, {req: "reload"});
+async function reloadGame(ws) {
+    const session = await getSession(ws);
+    await sendJsonToAllSessionMembers(ws, {req: "reload"}, session._id);
 }
 
 async function loadGame(ws, msg) {
@@ -143,9 +240,13 @@ async function loadGame(ws, msg) {
 
     if (await isEntity(ws)) {
         if (session.state == 1) {
-            await loadQueueGame(ws, msg, session._id, true);
             await sendTokens(ws);
-        } else ws.json({req: "loadGame", game: "entity"});
+        }
+        const generators = await Generator.find({session: session._id});
+        const hooks = await Hook.find({session: session._id});
+        const exitGates = await ExitGate.find({session: session._id});
+
+        ws.json({req: "loadGame", game: {players: await getPlayerData(ws), generators: generators, hooks: hooks, exitGates: exitGates}, state: session.state, isEntity: true});
     } else if (getPlayer(ws).isSurvivor) {
         if (session.state == 1) {
             await loadQueueGame(ws, msg, session._id, false);
@@ -167,7 +268,6 @@ async function loadGame(ws, msg) {
 }
 
 async function loadQueueGame(ws, msg, sessionid, isEntity) {
-    const players = await Player.find({session: sessionid});
     const session = await Session.findOne({_id: sessionid});
     ws.json({req: "loadGame", game: {players: await getPlayerData(ws)}, state: session.state, isEntity: isEntity});
 }
@@ -221,12 +321,13 @@ async function createToken(ws, msg) {
 }
 
 async function sendTokens(ws) {
-    const allTokens = await Token.find({session: await getEntitySession(ws)});
+    const session = await getSession(ws);
+    const allTokens = await Token.find({session: session._id});
     var tokenData = [];
     for (const tokken of allTokens) {
         tokenData.push(tokken.token);
     }
-    await sendJsonToEntity(ws, {req: "token", tokens: tokenData});
+    await sendJsonToEntity(ws, {req: "token", tokens: tokenData}, session._id);
 }
 
 async function registerPlayer(ws, msg) {
@@ -249,10 +350,6 @@ async function registerPlayer(ws, msg) {
     await reloadGame(ws);
     await token.remove();
     await sendTokens(ws);
-}
-
-async function updatePlayers(ws, msg) {
-    await sendJsonToAllSessionMembers(ws, {req: "updateplayers", players: await getPlayerData(ws)});
 }
 
 async function getPlayerData(ws) {
@@ -376,34 +473,33 @@ async function getPlayers(ws) {
     return playerdata;
 }
 
-async function sendJsonToAllSessionMembers(ws, msg) {
-    const session = await getSession(ws);
+async function sendJsonToAllSessionMembers(ws, msg, sessionid) {
     for (let i = 0; i < authCons.length; i++) {
         if (authCons[i].player != undefined)
-            if (authCons[i].player.session.equals(session._id))
+            if (authCons[i].player.session.equals(sessionid))
                 authCons[i].json(msg);
     }
-    await sendJsonToEntity(ws, msg);
+    await sendJsonToEntity(ws, msg, sessionid);
 }
 
-async function sendJsonToEntity(ws, msg) {
+async function sendJsonToEntity(ws, msg, sessionid) {
     if (await isEntity(ws)) {
         ws.json(msg);
     } else {
-        const session = await getSession(ws);
         for (let i = 0; i < authCons.length; i++) {
             if (await isEntity(authCons[i])) {
-                if (session._id.equals(ws.player.session)) {
+                if (sessionid.equals(ws.player.session)) {
                     authCons[i].json(msg);
-                    break;                }
+                    break;
+                }
             }
         }
     }
 }
 
-function reAuth(ws){
-    for (let i = 0; i < authCons.length; i++)  {
-        if(ws.user._id === authCons[i].user._id){
+function reAuth(ws) {
+    for (let i = 0; i < authCons.length; i++) {
+        if (ws.user._id === authCons[i].user._id) {
             authCons.splice(i, 1);
             authCons.push(ws);
             break;

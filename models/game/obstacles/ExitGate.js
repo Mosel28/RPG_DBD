@@ -5,6 +5,11 @@ const gate = new mongoose.Schema({
     position: {
         type: ['Point']
     },
+    setup: {
+        type: Boolean,
+        default: false
+    },
+    uid: String,
     openingProgress: {
         type: Number,
         default: 0

@@ -5,6 +5,11 @@ const gen = new mongoose.Schema({
     progress: Number,
     damaged: Boolean,
     finished: Boolean,
+    setup: {
+        type: Boolean,
+        default: false
+    },
+    uid: String,
     position: {
         type: ['Point']
     }

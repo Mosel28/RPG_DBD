@@ -12,6 +12,10 @@ const session = new mongoose.Schema({
     maxKillers: {
         type: Number,
         default: 1
+    },
+    setupDone: {
+        type: Boolean,
+        default: false
     }
 });
 

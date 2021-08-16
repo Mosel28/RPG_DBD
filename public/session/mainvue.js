@@ -9,36 +9,47 @@ var reg = new Vue({
         gameKey: "",
         tokens: [],
         isEntity: false,
+        message: "",
+        shown: false,
         ws: undefined
     },
     created: async function () {
         this.ws = connectWs(this.handleMessage);
 
-        setTimeout(function (){
+        setTimeout(function () {
             reg.ws.json({req: "loadGame"});
         }, 60);
     },
     methods: {
-        handleMessage: function (msg){
+        toggleQueue: function () {
+            if(this.queueShown && !this.isEntity) {
+                return;
+            } else
+            this.shown = !this.shown;
+        },
+        handleMessage: function (msg) {
             console.log(JSON.stringify(msg));
-            switch (msg.req){
+            switch (msg.req) {
                 case "loadGame":
-                    if(msg.game === "undefined"){
+                    if (msg.game === "undefined") {
                         this.queueShown = false;
                         this.createGameShown = true;
                         this.gameShown = false;
-                    }
-                    else {
+                        this.isEntity = false;
+                        this.shown = true;
+                    } else {
                         this.isEntity = msg.isEntity;
-                        if(msg.state === 1){
+                        if (msg.state === 1) {
                             this.players = msg.game.players;
                             this.queueShown = true;
                             this.createGameShown = false;
                             this.gameShown = false;
-                        } else if(msg.state === 0){
+                            this.shown = true;
+                        } else if (msg.state === 0) {
                             this.queueShown = false;
                             this.createGameShown = false;
                             this.gameShown = true;
+                            this.shown = false;
                         }
                     }
                     break;
@@ -55,23 +66,29 @@ var reg = new Vue({
                     break;
 
                 case "authstatus":
-                    if(msg.status === 401)
+                    if (msg.status === 401)
                         location.replace("/login");
+                    break;
+
+                case "print":
+                    this.message = msg.message;
                     break;
             }
         },
-        createGame: function (){
+        createGame: function () {
             this.ws.json({req: "createGame"});
         },
-        join: function (){
+        join: function () {
             this.ws.json({req: "logplayer", token: this.gameKey});
         },
-        createToken: function (){
+        createToken: function () {
             this.ws.json({req: "createToken"});
         },
-        kickPlayer: function (id){
-            console.log(id);
+        kickPlayer: function (id) {
             this.ws.json({req: "kickPlayer", player: id});
+        },
+        quit: function () {
+            this.ws.json({req: "quit"});
         }
     }
 });
