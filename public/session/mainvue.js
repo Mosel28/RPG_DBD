@@ -176,8 +176,12 @@ async function setupNFC() {
 }
 
 async function readTag() {
-    if (ndef !== undefined)
-        await ndef.scan();
+    try {
+        if (ndef !== undefined)
+            await ndef.scan();
+    }catch (e){
+        console.log(e);
+    }
 }
 
 async function writeTag() {
