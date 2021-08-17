@@ -20,6 +20,10 @@ let skillcheck = {
 let activeSkillcheck;
 let skillCheckPointer = document.getElementById("skillCheckPointer");
 let skillCheckSucessArea = document.getElementById("skillCheckSucessArea");
+//Generator Id that is selected.
+let generatorID = -1; //
+let generatorTimeOut = 5; //Time until you have to rescan NFC Code
+let generatorClickSpam = false; //true if clicked 
 
 
 /*
@@ -29,7 +33,6 @@ Usage: socket.json({data});
 
 function messageHandler(msg) {
     console.log(msg.req);
-
 
     switch (msg.req) {
         case 'generatorProgress':
@@ -41,6 +44,8 @@ function messageHandler(msg) {
         case 'distanceKiller':
             updateTerrorRadius(msg.distance);
             break;
+        case 'attemptSkillCheck':
+            initSkillCheck(msg.difficulty);
     }
 }
 
@@ -51,27 +56,32 @@ let socket = connectWs(messageHandler);
  * Constant push of geolocation
  */
 function pushGeoLocation() {
+    console.log("Try to catch Geolocation");
     let startPos;
 
     let nudge = document.getElementById("nudge");
 
-    const showNudgeBanner = function () {
+    const showNudgeBanner = function() {
         nudge.style.display = "block";
     };
 
-    const hideNudgeBanner = function () {
+    const hideNudgeBanner = function() {
         nudge.style.display = "none";
         nudge.innerHTML = "Dein GPS ist Scheise."
     };
 
     const nudgeTimeoutId = setTimeout(showNudgeBanner, 5000);
 
-    var geoSuccess = function (position) {
+    var geoSuccess = function(position) {
         hideNudgeBanner();
         // We have the location, don't display banner
         clearTimeout(nudgeTimeoutId);
         playerCoordinates.latitude = position.coords.latitude;
         playerCoordinates.longitude = position.coords.longitude;
+
+        console.log(playerCoordinates.latitude, playerCoordinates.longitude)
+        document.getElementById("startLat").innerHTML = playerCoordinates.latitude;
+        document.getElementById("startLon").innerHTML = playerCoordinates.longitude;
 
         //PUSH
         socket.json({
@@ -79,10 +89,11 @@ function pushGeoLocation() {
             longitude: position.coords.longitude
         });
     };
-    var geoError = function (error) {
+    var geoError = function(error) {
         switch (error.code) {
             case error.TIMEOUT:
                 // The user didn't accept the callout
+                console.error("GPS Berechtigung nicht erteilt")
                 showNudgeBanner();
                 break;
         }
@@ -129,6 +140,13 @@ function updateGeneratorProgress(percent) //(0...100)
     }
     let progress = 80 / 100 * percent;
     document.getElementById("progressBar").style.width = progress + '%';
+
+    //give progress back if survivor has done something @Noah
+    if (generatorProgressSinceLastRequest) {
+        generatorProgressSinceLastRequest = false;
+
+
+    }
 }
 
 /**
@@ -159,7 +177,7 @@ function initSkillCheck(difficulty = 2) {
     console.log("init Skillcheck ")
     if (difficulty > 3 || difficulty < 1) {
         console.exception("Wrong Skill Check Init Parameter! Read Commentary!");
-        return;
+        difficulty = 1;
     }
 
     if (skillcheck.active)
@@ -175,8 +193,8 @@ function initSkillCheck(difficulty = 2) {
 
     // skillCheckPointer.style.backgroundColor = "green"
     console.log(skillcheck)
-    //Init UI Skill check here
-    //skillCheckSucessArea
+        //Init UI Skill check here
+        //skillCheckSucessArea
     let c = document.getElementById("skillCheckSucessArea");
     let ctx = c.getContext("2d");
 
@@ -193,9 +211,9 @@ function initSkillCheck(difficulty = 2) {
         skillcheck.progress = skillcheck.progress + skillcheck.timeStep;
 
         console.log("ActiveSkillCheck")
-        //Update UI Skill check here
+            //Update UI Skill check here
         let rotation = 360 / 100 * skillcheck.progress
-        if (skillcheck.progress > 0){
+        if (skillcheck.progress > 0) {
             skillCheckSucessArea.style.visibility = 'visible';
             skillCheckPointer.style.transform = 'rotate(' + rotation + 'deg)';
         }
@@ -225,39 +243,61 @@ function clickSkillCheck() {
         console.log("Skill check successful");
         stopSkillCheck();
         playSoundSkillCheckSuccess();
-        //  skillCheckPointer.style.backgroundColor = "blue"
+
     } else {
         console.log("Skill check unsuccessful")
         stopSkillCheck();
         playSoundSkillCheckFail();
+
+
+        socket.json({
+            req: "generatorFailCheck",
+            generator: generatorID
+        });
+
         //  skillCheckPointer.style.backgroundColor = "red"
     }
 }
 
-//TESTFUNKTIONEN
+/*
+Generator Task
+*/
+function initGeneratorTask(gpeneratorID) { //if NFC chick scanned, plz here enter @Noah
+    generatorID = pGeneratorID;
+    generatorTimeOut = 10;
+    socket.json({
+        req: "regGeneratorRepair"
+    })
 
-let rotation = 0;
-
-function rotate() {
-
-    //console.warn("rotate",rotation)
 }
 
-/*
-var tid = setInterval(function () {
-    document.getElementById("skillCheckBtn").style.transform = 'rotate(' + rotation + 'deg)';
-    rotation++;
-    if (rotate == 360)
-        rotate = 0;
+function clickSpamGenerator() { //button repair clicked
+    generatorClickSpam = true;
+    //pushGeoLocation();
+}
 
-}, 16);
+function updateGeneratorTask() {
+    if (generatorID == -1 || generatorTimeOut <= -1)
+        return;
+
+    if (generatorClickSpam) {
+        generatorClickSpam = false;
+        generatorTimeOut = 5;
+        socket.json({
+            req: "endGeneratorRepair"
+        })
+    } else {
+        generatorTimeOut--;
+    }
+    console.log("Clickspam Generator Active")
+    generatorProgressSinceLastRequest = true; //Server asks if Survivor has done something in updateGeneratorProgress
+}
+
+setInterval(updateGeneratorTask, 500);
 
 
- */
 if ("geolocation" in navigator) {
     console.warn("GPS Funktioniert!")
 } else {
     console.warn("GPS Funktioniert NICHT!")
 }
-
-setInterval(initSkillCheck, 5000);
