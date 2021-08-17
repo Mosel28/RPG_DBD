@@ -107,11 +107,14 @@ router.ws('/', function (ws, req) {
                     console.log(player)
                     if(killer === undefined || player === undefined)return;
                     let distance = Math.sqrt(Math.pow((killer.position[0] - player.position[0]), 2) + Math.pow((killer.position[1] - player.position[1]), 2));
+                    console.log("distance: " + distance);
                     if (distance <= 30) {
                         if (distance <= 15) {
                             ws.json({req: "terror", distance: 15});
-                        } else {
+                        } else if(distance <= 30){
                             ws.json({req: "terror", distance: 30});
+                        } else {
+                            ws.json({req: "terror", distance: -1});
                         }
                     }
                 });
