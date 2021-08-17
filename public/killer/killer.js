@@ -1,7 +1,11 @@
 /*
 Global stuff
 */
-//Generator Id that is selected.
+const playerCoordinates = {
+        latitude: 0,
+        longitude: 0,
+    }
+    //Generator Id that is selected.
 let generatorID = -1; //
 let generatorTimeOut = 5; //Time until you have to rescan NFC Code
 let generatorClickSpam = false; //true if clicked 
@@ -93,6 +97,7 @@ function messageHandler(msg) {
             initUi(msg.playerData);
     }
 }
+let socket = connectWs(messageHandler);
 
 //test 
 let data = [{ name: 'Nommit' }, { name: 'Strawberry' }, { name: 'Mindcollaps' }, { name: 'Mickey' }]
@@ -106,8 +111,57 @@ function initUi(data) {
     showNotification('Welcome to the Map', 'Map: Farm Besetze. Good Hunt!')
 }
 
+/*
+ * Constant push of geolocation
+ */
+function pushGeoLocation() {
+    console.log("Try to catch Geolocation");
+    let startPos;
 
+    let nudge = document.getElementById("nudge");
 
+    const showNudgeBanner = function() {
+        nudge.style.display = "block";
+    };
+
+    const hideNudgeBanner = function() {
+        nudge.style.display = "none";
+        nudge.innerHTML = "Dein GPS ist Scheise."
+    };
+
+    const nudgeTimeoutId = setTimeout(showNudgeBanner, 5000);
+
+    var geoSuccess = function(position) {
+        hideNudgeBanner();
+        // We have the location, don't display banner
+        clearTimeout(nudgeTimeoutId);
+        playerCoordinates.latitude = position.coords.latitude;
+        playerCoordinates.longitude = position.coords.longitude;
+
+        console.log(playerCoordinates.latitude, playerCoordinates.longitude)
+            //document.getElementById("startLat").innerHTML = playerCoordinates.latitude;
+            //document.getElementById("startLon").innerHTML = playerCoordinates.longitude;
+
+        //PUSH
+        socket.json({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+        });
+    };
+    var geoError = function(error) {
+        switch (error.code) {
+            case error.TIMEOUT:
+                // The user didn't accept the callout
+                console.error("GPS Berechtigung nicht erteilt")
+                showNudgeBanner();
+                break;
+        }
+    };
+
+    navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
+}
+
+setInterval(pushGeoLocation, 1000);
 /**
  * Killer damages generator
  * 
@@ -206,8 +260,11 @@ function clickHookPlayer() {
         if (document.getElementById('hookNumber').value) {
             socket.json({
                 req: 'hooked',
-                player: playerSelectedToHook
+                player: playerSelectedToHook,
+                hook: document.getElementById('hookNumber').value
             })
+
+            document.getElementById('hookNumber').value = '';
             return;
         }
         showNotification('Mistake', 'You have to select the Hook');
