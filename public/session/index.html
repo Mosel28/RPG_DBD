@@ -28,6 +28,7 @@
             </div>
             <div v-if="queueShown">
                 <div>
+                    <button @click="sendPosition">Send</button>
                     <div v-for="player in players">
                         Name: <a v-if="isEntity" @click="toggleMenu(document.getElementById(player._id))">{{player.name}}</a><a v-else>{{player.name}}</a>
                         <button v-if="isEntity" @click="kickPlayer(player._id)">Kick</button>

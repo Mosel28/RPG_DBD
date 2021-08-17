@@ -15,21 +15,24 @@ var reg = new Vue({
         shown: false,
         menuState: 0,
         active: "context-menu--active",
-        reload: false,
         gameState: 0,
+        latitude: 0,
+        longitude: 0,
+        isPositionGranted: false,
         ws: undefined
     },
     created: async function () {
-        this.ws = connectWs(this.handleMessage, function (reconnect){
+        this.watchLocation();
+        this.ws = connectWs(this.handleMessage, function (reconnect) {
             reg.ws.json({req: "loadGame"});
         });
     },
     methods: {
         toggleQueue: function () {
-            if(this.queueShown && !this.isEntity) {
+            if (this.queueShown && !this.isEntity) {
                 return;
             } else
-            this.shown = !this.shown;
+                this.shown = !this.shown;
         },
         handleMessage: function (msg) {
             console.log(JSON.stringify(msg));
@@ -43,29 +46,27 @@ var reg = new Vue({
                         this.shown = true;
                     } else {
                         this.isEntity = msg.isEntity;
-                        if(!this.reload || this.gameState !== msg.state && !this.isEntity){
-                            this.reload = true;
-                            if (msg.state === 1) {
-                                this.queueShown = true;
-                                this.createGameShown = false;
-                                this.gameShown = false;
-                                this.shown = true;
-                            } else if (msg.state === 0) {
-                                this.queueShown = false;
-                                this.createGameShown = false;
-                                this.gameShown = true;
-                                this.shown = false;
-                            }
+                        if (msg.state === 1) {
+                            this.queueShown = true;
+                            this.createGameShown = false;
+                            this.gameShown = false;
+                            this.shown = true;
+                        } else if (msg.state === 0) {
+                            this.queueShown = false;
+                            this.createGameShown = false;
+                            this.gameShown = true;
+                            this.shown = false;
                         }
+
                         this.gameState = msg.state;
                         this.players = msg.game.players;
                         this.killers = [];
                         this.survivors = [];
 
-                        for(const pl of this.players){
-                            if(pl.isKiller)
+                        for (const pl of this.players) {
+                            if (pl.isKiller)
                                 this.killers.push(pl);
-                            if(pl.isSurvivor)
+                            if (pl.isSurvivor)
                                 this.survivors.push(pl);
                         }
                     }
@@ -92,6 +93,9 @@ var reg = new Vue({
                     break;
             }
         },
+        sendPosition: function () {
+            reg.ws.json({req: "updatePos", position: [this.latitude, this.longitude]});
+        },
         createGame: function () {
             this.ws.json({req: "createGame"});
         },
@@ -108,16 +112,36 @@ var reg = new Vue({
             this.ws.json({req: "quit"});
         },
         toggleMenu: function (menu) {
-            if ( this.menuState !== 1 ) {
+            if (this.menuState !== 1) {
                 this.menuState = 1;
                 menu.classList.add(this.active);
-            }else if ( this.menuState !== 0 ) {
+            } else if (this.menuState !== 0) {
                 this.menuState = 0;
                 menu.classList.remove(this.active);
             }
         },
-        changePlayerType: function (id, type){
+        changePlayerType: function (id, type) {
             this.ws.json({req: "changePlayerType", player: id, type: type});
+        },
+        geoSuccess: function (position) {
+            this.latitude = position.coords.latitude;
+            this.longitude = position.coords.longitude;
+        },
+        geoError: function (error) {
+
+        },
+        watchLocation: function () {
+            navigator.permissions.query({ name: 'geolocation' })
+                .then(function (p){
+                    this.isPositionGranted = p.state === "granted";
+                    console.log("Permission acces is " + p.state);
+                });
+            var geo_options = {
+                enableHighAccuracy: true,
+                maximumAge        : 30000,
+                timeout           : 27000
+            };
+            navigator.geolocation.watchPosition(this.geoSuccess, this.geoError, geo_options);
         }
     }
 });

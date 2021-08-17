@@ -36,6 +36,7 @@ router.ws('/', function (ws, req) {
                 break;
 
             case "updatePos":
+                console.log("updatePos: " + msg.position);
                 updatePos(ws, msg);
                 break;
 
@@ -79,11 +80,32 @@ router.ws('/', function (ws, req) {
                 changePlayerType(ws, msg);
                 break;
 
+            case "generatorFailCheck":
+                break;
+
+            case "damageGenerator":
+                break;
+
+            case "regGeneratorRepair":
+                break;
+
+            case "endGeneratorRepair":
+                break;
+
             case "regTerrorRadius":
-                const job = schedule.scheduleJob({second: .1}, async function () {
-                    if (!isAuth(ws)) return job.cancel();
-                    let killer = getKiller(ws);
-                    let player = getPlayer(ws);
+                console.log("started");
+                const rule = new schedule.RecurrenceRule();
+                rule.second = 2;
+                const job = schedule.scheduleJob(rule, async function () {
+                    if (!isAuth(ws)) {
+                        console.log("disconnecting job");
+                        return job.cancel();
+                    }
+                    let killer = await getKiller(ws);
+                    let player = await getPlayer(ws);
+                    console.log(killer)
+                    console.log(player)
+                    if(killer === undefined || player === undefined)return;
                     let distance = Math.sqrt(Math.pow((killer.position[0] - player.position[0]), 2) + Math.pow((killer.position[1] - player.position[1]), 2));
                     if (distance <= 30) {
                         if (distance <= 15) {
@@ -92,7 +114,7 @@ router.ws('/', function (ws, req) {
                             ws.json({req: "terror", distance: 30});
                         }
                     }
-                })
+                });
                 break;
 
             case "auth":
