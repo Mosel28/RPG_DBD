@@ -22,6 +22,8 @@ var reg = new Vue({
         ws: undefined
     },
     created: async function () {
+        await setupNFC();
+        await readTag();
         this.watchLocation();
         this.ws = connectWs(this.handleMessage, function (reconnect) {
             reg.ws.json({req: "loadGame"});
@@ -131,17 +133,67 @@ var reg = new Vue({
 
         },
         watchLocation: function () {
-            navigator.permissions.query({ name: 'geolocation' })
-                .then(function (p){
+            navigator.permissions.query({name: 'geolocation'})
+                .then(function (p) {
                     this.isPositionGranted = p.state === "granted";
                     console.log("Permission acces is " + p.state);
                 });
             var geo_options = {
                 enableHighAccuracy: true,
-                maximumAge        : 30000,
-                timeout           : 27000
+                maximumAge: 30000,
+                timeout: 27000
             };
             navigator.geolocation.watchPosition(this.geoSuccess, this.geoError, geo_options);
+        },
+        startNfc: function () {
+
         }
     }
 });
+
+var ndef;
+
+async function setupNFC() {
+    try {
+        if ("NDEFReader" in window) {
+            ndef = new NDEFReader();
+        } else {
+            console.log("Web NFC is not supported.");
+        }
+
+        if (ndef !== undefined)
+            ndef.onreading = event => {
+                const decoder = new TextDecoder();
+                for (const record of event.message.records) {
+                    console.log("Record type:  " + record.recordType);
+                    console.log("MIME type:    " + record.mediaType);
+                    console.log("=== data ===\n" + decoder.decode(record.data));
+                }
+            }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+async function readTag() {
+    try {
+        if (ndef !== undefined)
+            await ndef.scan();
+    }catch (e){
+        console.log(e);
+    }
+}
+
+async function writeTag() {
+    if ("NDEFReader" in window) {
+        const ndef = new NDEFReader();
+        try {
+            await ndef.write("What Web Can Do Today");
+            console.log("NDEF message written!");
+        } catch (error) {
+            console.log(error);
+        }
+    } else {
+        console.log("Web NFC is not supported.");
+    }
+}
