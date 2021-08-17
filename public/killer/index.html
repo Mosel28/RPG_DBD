@@ -12,10 +12,13 @@
 <body>
     <div class="app" id="root">
 
-        <div class="eventBoard">
+        <div class="notificationBoard" id="notification">
             <!--(Notifications) Player unhooked, failing Skillcheck, gates open-->
-            <h1>Eventboard</h1>
-            <button class="notification">Player: Nommit unhooked</button>
+
+            <h1 id="caption">Hook</h1>
+            <h2 id="message">Nommit unhooked</h2>
+            <!--<button class="notification">Player: Nommit unhooked</button>
+            -->
         </div>
 
         <div class="hookControll">
@@ -32,7 +35,7 @@
             <!--Breaking the generator-->
             <h1>Generator Control</h1>
             <div class="progressBar" id="progressBar"></div>
-            <button onclick="clickSpamGenerator()">Break</button>
+            <button onclick="clickSpamGenerator()" class="buttonBreak">Break</button>
         </div>
 
     </div>

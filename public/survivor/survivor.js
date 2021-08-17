@@ -24,6 +24,11 @@ let skillCheckSucessArea = document.getElementById("skillCheckSucessArea");
 let generatorID = -1; //
 let generatorTimeOut = 5; //Time until you have to rescan NFC Code
 let generatorClickSpam = false; //true if clicked 
+//Notifications
+let notificationTimeout = 0;
+let notificationBox = document.getElementById("notification");
+let notificationBoxCaption = document.getElementById("caption");
+let notificationBoxMessage = document.getElementById("message")
 
 
 /*
@@ -80,8 +85,8 @@ function pushGeoLocation() {
         playerCoordinates.longitude = position.coords.longitude;
 
         console.log(playerCoordinates.latitude, playerCoordinates.longitude)
-        document.getElementById("startLat").innerHTML = playerCoordinates.latitude;
-        document.getElementById("startLon").innerHTML = playerCoordinates.longitude;
+            //document.getElementById("startLat").innerHTML = playerCoordinates.latitude;
+            //document.getElementById("startLon").innerHTML = playerCoordinates.longitude;
 
         //PUSH
         socket.json({
@@ -301,3 +306,35 @@ if ("geolocation" in navigator) {
 } else {
     console.warn("GPS Funktioniert NICHT!")
 }
+
+
+/*
+Push Messages 
+*/
+
+function showNotification(title, message) {
+    clearMessages();
+    notificationTimeout = 10;
+    notificationBox.style.top = '0px';
+    notificationBoxCaption.innerHTML = title;
+    notificationBoxMessage.innerHTML = message;
+
+}
+
+function resetMessageBoard() {
+    if (notificationTimeout < 0) {
+        showNotification("Hook", "Nommit hooked");
+        return;
+    }
+    if (notificationTimeout == 0) {
+        clearMessages();
+    }
+    notificationTimeout--;
+
+}
+
+function clearMessages() {
+    notificationBox.style.top = '-30%';
+}
+
+setInterval(resetMessageBoard, 1000);

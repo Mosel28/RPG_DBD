@@ -6,6 +6,12 @@ let generatorID = -1; //
 let generatorTimeOut = 5; //Time until you have to rescan NFC Code
 let generatorClickSpam = false; //true if clicked 
 let generatorProgress = 0;
+//
+let notificationTimeout = 0;
+let notificationBox = document.getElementById("notification");
+let notificationBoxCaption = document.getElementById("caption");
+let notificationBoxMessage = document.getElementById("message")
+
 
 
 /*
@@ -25,6 +31,9 @@ function messageHandler(msg) {
             break;
         case 'distanceKiller':
             updateTerrorRadius(msg.distance);
+            break;
+        case 'notification':
+            showNotification(msg.caption, msg.message);
             break;
     }
 }
@@ -78,12 +87,33 @@ function updateGeneratorProgress(percent) //(0...100)
 }
 
 
-//Testcode!!!!
-let progress = 0
+/*
+Push Messages 
+*/
 
-setInterval(function() {
-    if (progress == 100)
-        progress = 0;
-    updateGeneratorProgress(progress)
-    progress++;
-}, 20)
+function showNotification(title, message) {
+    clearMessages();
+    notificationTimeout = 10;
+    notificationBox.style.top = '0px';
+    notificationBoxCaption.innerHTML = title;
+    notificationBoxMessage.innerHTML = message;
+
+}
+
+function resetMessageBoard() {
+    if (notificationTimeout < 0) {
+        showNotification("Hook", "Nommit unhooked");
+        return;
+    }
+    if (notificationTimeout == 0) {
+        clearMessages();
+    }
+    notificationTimeout--;
+
+}
+
+function clearMessages() {
+    notificationBox.style.top = '-30%';
+}
+
+setInterval(resetMessageBoard, 1000);

@@ -8,50 +8,40 @@ body {
     --color-tertiary: #1e1e21;
     --color-glass: rgba(31, 31, 31, 0.6);
     --color-scrollbar: #7289da;
-
     --color-bg: #1a1a1c;
     --color-backdrop: rgba(0, 0, 51, 0.4);
-
     --button-0: #7289da;
     --button-0-2: #7289da;
     --button-0-hover: #7289da;
     --button-0-2-hover: #7289da;
-
     --button-decline: #DA7289;
     --button-decline-2: #DA7289;
     --button-decline-hover: #DA7289;
     --button-decline-2-hover: #DA7289;
-
     --button-accept: #89DA72;
     --button-accept-2: #89DA72;
     --button-accept-hover: #89DA72;
     --button-accept-2-hover: #89DA72;
-
     --color-headline: #dddddd;
     --color-shadow: rgba(0, 0, 0, .4);
     --color-shadow-hover: #36393e;
     --color-shadow-highlight: rgba(33, 0, 255, 0.3);
-
     --color-dark: #364C62;
     --color-light: #F5F5F5;
     --font-family-primary: "Roboto Mono", monospace;
     --font-family-secondary: "Rubik Mono One", sans-serif;
-
     --color-font-primary: #ababab;
     --color-font-primary-hover: var(--color-font-primary);
     --color-font-primary-2: var(--color-font-primary);
     --color-font-primary-hover-2: var(--color-font-primary);
-
     --color-font-secondary: #ffffff;
     --color-font-secondary-hover: #ffffff;
     --color-font-secondary-2: #ffffff;
     --color-font-secondary-hover-2: #ffffff;
-
     --color-font-highlight: #7289da;
     --color-font-highlight-2: #a46ed4;
     --color-font-highlight-hover: #5d70b1;
     --color-font-highlight-hover-2: #744c94;
-
     --td: 100ms;
     --te: cubic-bezier(0.215, 0.61, 0.355, 1);
 }
@@ -106,7 +96,6 @@ body {
     overflow-x: hidden;
     overflow-y: scroll;
 }
-
 
 .advice {
     transition: all 250ms ease;
@@ -178,15 +167,22 @@ body {
     border-width: 3px;
 }
 
-
 h1 {
     margin: 20px;
     left: 40px;
     color: white
 }
-h3{
-    margin: 10px;
-    color: #555555;
+
+h2 {
+    margin: 20px;
+    left: 40px;
+    color: #CC2222;
+}
+
+h3 {
+    margin: 20px;
+    left: 40px;
+    color: #992222;
 }
 
 button {
@@ -205,7 +201,16 @@ button:focus {
     background-color: #660000;
 }
 
-.playerCard{
+.buttonBreak {
+    position: absolute;
+    width: 40%;
+    height: auto;
+    right: 1rem;
+    top: 2rem;
+    bottom: 2rem;
+}
+
+.playerCard {
     font-size: small;
     margin: 10px;
     color: #003300;
@@ -213,7 +218,8 @@ button:focus {
     width: 20%;
     height: 20%;
 }
-.playerCardHooked{
+
+.playerCardHooked {
     font-size: small;
     margin: 10px;
     color: #660000;
@@ -221,7 +227,8 @@ button:focus {
     width: 20%;
     height: 20%;
 }
-.playerCardHookedOnce{
+
+.playerCardHookedOnce {
     font-size: small;
     margin: 10px;
     color: #664400;
@@ -229,7 +236,8 @@ button:focus {
     width: 20%;
     height: 20%;
 }
-.playerCardHookedSecond{
+
+.playerCardHookedSecond {
     font-size: small;
     margin: 10px;
     color: #331100;
@@ -237,7 +245,8 @@ button:focus {
     width: 20%;
     height: 20%;
 }
-.playerCardSacrificed{
+
+.playerCardSacrificed {
     font-size: small;
     margin: 10px;
     color: #050505;
@@ -246,25 +255,28 @@ button:focus {
     height: 20%;
 }
 
-.generatorView{
+.generatorView {
     margin: 0;
     width: 10%;
     height: 100px;
     background-color: #440000;
 }
-.generatorProgress{
+
+.generatorProgress {
     margin: 0;
     width: 10%;
     height: 100px;
     background-color: #444400;
 }
-.generatorDone{
+
+.generatorDone {
     margin: 0;
     width: 10%;
     height: 100px;
     background-color: #004400;
 }
-.hookStateCard{
+
+.hookStateCard {
     display: inline-block;
     width: max-content;
     margin: 0;
@@ -279,17 +291,6 @@ button:focus {
     background-color: #000000;
     height: 100%;
     width: 100%;
-    border-style: dashed;
-    border-color: #5555;
-    border-width: 3px;
-}
-
-.eventBoard {
-    position: absolute;
-    top: 0%;
-    left: 0%;
-    right: 0%;
-    height: 25%;
     border-style: dashed;
     border-color: #5555;
     border-width: 3px;
@@ -310,13 +311,12 @@ button:focus {
     position: absolute;
     left: 0%;
     right: 0%;
-    top: 50%;
-    height: 25%;
+    bottom: 0%;
+    height: 30%;
     border-style: dashed;
     border-color: #5555;
     border-width: 3px;
 }
-
 
 .progressBar {
     position: absolute;
@@ -327,25 +327,22 @@ button:focus {
     background-color: #660000;
 }
 
-.playerCard{
+.playerCard {
     color: #660000;
     position: relative;
     width: 150px;
     height: 100px;
 }
 
-
-.notification{
-    color: #660000;
+.notification {
+    border-width: 3px;
+    border-style: dashed;
+    border-color: #36393e;
+    border-radius: 1rem;
+    color: #990000;
     position: relative;
     width: 50%;
     height: 100px;
-}
-
-h3 {
-    margin: 20px;
-    left: 40px;
-    color: #992222;
 }
 
 a {
@@ -378,18 +375,15 @@ footer {
 }
 
 html {
-
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
 }
 
-.generatorView{
+.generatorView {}
 
-}
-
-.buttonHolder{
+.buttonHolder {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
@@ -405,15 +399,18 @@ html {
     background-color: green;
 }
 
-.eventBoard {
+.notificationBoard {
+    text-align: center;
     position: absolute;
+    top: -30%;
     left: 0%;
     right: 0%;
-    top: 0%;
-    height: 25%;
+    height: 15%;
     border-style: dashed;
     border-color: #5555;
     border-width: 3px;
+    background-color: #202022;
+    transition: 0.5s;
 }
 
 .skillcheck {
@@ -426,12 +423,13 @@ html {
     border-color: #5555;
     border-width: 3px;
 }
-.skillCheckBtn{
 
+.skillCheckBtn {
     width: 300px;
     height: 300px;
 }
-.skillCheckPointer{
+
+.skillCheckPointer {
     position: absolute;
     top: 15%;
     width: 300px;
