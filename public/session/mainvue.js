@@ -133,19 +133,19 @@ var reg = new Vue({
 
         },
         watchLocation: function () {
-            navigator.permissions.query({ name: 'geolocation' })
-                .then(function (p){
+            navigator.permissions.query({name: 'geolocation'})
+                .then(function (p) {
                     this.isPositionGranted = p.state === "granted";
                     console.log("Permission acces is " + p.state);
                 });
             var geo_options = {
                 enableHighAccuracy: true,
-                maximumAge        : 30000,
-                timeout           : 27000
+                maximumAge: 30000,
+                timeout: 27000
             };
             navigator.geolocation.watchPosition(this.geoSuccess, this.geoError, geo_options);
         },
-        startNfc: function (){
+        startNfc: function () {
 
         }
     }
@@ -153,29 +153,30 @@ var reg = new Vue({
 
 var ndef;
 
-async function setupNFC(){
-    if ("NDEFReader" in window) {
-        ndef = new NDEFReader();
-    } else {
-        console.log("Web NFC is not supported.");
-    }
-
+async function setupNFC() {
     try {
-        ndef.onreading = event => {
-            const decoder = new TextDecoder();
-            for (const record of event.message.records) {
-                console.log("Record type:  " + record.recordType);
-                console.log("MIME type:    " + record.mediaType);
-                console.log("=== data ===\n" + decoder.decode(record.data));
-            }
+        if ("NDEFReader" in window) {
+            ndef = new NDEFReader();
+        } else {
+            console.log("Web NFC is not supported.");
         }
-    } catch (e){
+
+        if (ndef !== undefined)
+            ndef.onreading = event => {
+                const decoder = new TextDecoder();
+                for (const record of event.message.records) {
+                    console.log("Record type:  " + record.recordType);
+                    console.log("MIME type:    " + record.mediaType);
+                    console.log("=== data ===\n" + decoder.decode(record.data));
+                }
+            }
+    } catch (e) {
         console.log(e);
     }
 }
 
 async function readTag() {
-    if(ndef !== undefined)
+    if (ndef !== undefined)
         await ndef.scan();
 }
 
@@ -185,7 +186,7 @@ async function writeTag() {
         try {
             await ndef.write("What Web Can Do Today");
             console.log("NDEF message written!");
-        } catch(error) {
+        } catch (error) {
             console.log(error);
         }
     } else {
