@@ -160,13 +160,17 @@ async function setupNFC(){
         console.log("Web NFC is not supported.");
     }
 
-    ndef.onreading = event => {
-        const decoder = new TextDecoder();
-        for (const record of event.message.records) {
-            console.log("Record type:  " + record.recordType);
-            console.log("MIME type:    " + record.mediaType);
-            console.log("=== data ===\n" + decoder.decode(record.data));
+    try {
+        ndef.onreading = event => {
+            const decoder = new TextDecoder();
+            for (const record of event.message.records) {
+                console.log("Record type:  " + record.recordType);
+                console.log("MIME type:    " + record.mediaType);
+                console.log("=== data ===\n" + decoder.decode(record.data));
+            }
         }
+    } catch (e){
+        console.log(e);
     }
 }
 
