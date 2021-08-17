@@ -75,6 +75,10 @@ router.ws('/', function (ws, req) {
                 removeObstacle(ws, msg);
                 break;
 
+            case "changePlayerType":
+                changePlayerType(ws, msg);
+                break;
+
             case "regTerrorRadius":
                 const job = schedule.scheduleJob({second: .1}, async function () {
                     if (!isAuth(ws)) return job.cancel();
@@ -133,6 +137,26 @@ router.ws('/', function (ws, req) {
         ws.close();
     });
 });
+
+async function changePlayerType(ws, msg) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (!await isEntity(ws)) return ws.json({req: "authstatus", status: 4011});
+    const player = await Player.findOne({_id: msg.player});
+    if (!player) return;
+    switch (msg.type) {
+        case "killer":
+            player.isKiller = true;
+            player.isSurvivor = false;
+            break;
+
+        case "survivor":
+            player.isKiller = false;
+            player.isSurvivor = true;
+            break;
+    }
+    await player.save();
+    await reloadGame(ws);
+}
 
 async function removeObstacle(ws, msg) {
     const session = await getSession(ws);
@@ -394,28 +418,15 @@ async function getPlayerData(ws) {
     for (const player of players) {
         player.usr = await User.findOne({_id: player.user});
         if (isEnt)
-            playerlist.push({name: player.usr.username, _id: player._id});
+            playerlist.push({
+                name: player.usr.username, isKiller: player.isKiller, isSurvivor: player.isSurvivor, _id: player._id});
         else
-            playerlist.push({name: player.usr.username});
+            playerlist.push({name: player.usr.username, isKiller: player.isKiller, isSurvivor: player.isSurvivor});
     }
     return playerlist;
 }
 
 async function login(ws, message) {
-    let errmsg = "";
-    let err = false;
-    if (message.username.length < 5) {
-        errmsg += "The username should have a least 5 characters";
-        err = true;
-    }
-    if (message.password.length < 8) {
-        errmsg += "The password should have a least 8 characters";
-        err = true;
-    }
-    if (err) {
-        ws.json({req: "print", message: errmsg});
-        return;
-    }
     //Check if the user is in db
     const user = await User.findOne({username: message.username.toLowerCase()});
     if (!user) return ws.json({req: "print", message: "Username or password is wrong!"});
@@ -439,6 +450,14 @@ async function register(ws, message) {
     }
     if (message.password.length < 8) {
         errmsg += "The password should have a least 8 characters";
+        err = true;
+    }
+    if(message.password.length > 30){
+        errmsg += "The password should not have more than 30 characters\n";
+        err = true;
+    }
+    if(message.username.length > 30){
+        errmsg += "The username should not have more than 30 characters\n";
         err = true;
     }
     if (err) {

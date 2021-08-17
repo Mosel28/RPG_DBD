@@ -1,7 +1,9 @@
 var reg = new Vue({
     el: '#entity',
     data: {
-        players: "",
+        players: [],
+        killers: [],
+        survivors: [],
         hooks: "",
         gameShown: false,
         createGameShown: false,
@@ -11,6 +13,10 @@ var reg = new Vue({
         isEntity: false,
         message: "",
         shown: false,
+        menuState: 0,
+        active: "context-menu--active",
+        reload: false,
+        gameState: 0,
         ws: undefined
     },
     created: async function () {
@@ -37,17 +43,30 @@ var reg = new Vue({
                         this.shown = true;
                     } else {
                         this.isEntity = msg.isEntity;
-                        if (msg.state === 1) {
-                            this.players = msg.game.players;
-                            this.queueShown = true;
-                            this.createGameShown = false;
-                            this.gameShown = false;
-                            this.shown = true;
-                        } else if (msg.state === 0) {
-                            this.queueShown = false;
-                            this.createGameShown = false;
-                            this.gameShown = true;
-                            this.shown = false;
+                        if(!this.reload || this.gameState !== msg.state && !this.isEntity){
+                            this.reload = true;
+                            if (msg.state === 1) {
+                                this.queueShown = true;
+                                this.createGameShown = false;
+                                this.gameShown = false;
+                                this.shown = true;
+                            } else if (msg.state === 0) {
+                                this.queueShown = false;
+                                this.createGameShown = false;
+                                this.gameShown = true;
+                                this.shown = false;
+                            }
+                        }
+                        this.gameState = msg.state;
+                        this.players = msg.game.players;
+                        this.killers = [];
+                        this.survivors = [];
+
+                        for(const pl of this.players){
+                            if(pl.isKiller)
+                                this.killers.push(pl);
+                            if(pl.isSurvivor)
+                                this.survivors.push(pl);
                         }
                     }
                     break;
@@ -87,6 +106,18 @@ var reg = new Vue({
         },
         quit: function () {
             this.ws.json({req: "quit"});
+        },
+        toggleMenu: function (menu) {
+            if ( this.menuState !== 1 ) {
+                this.menuState = 1;
+                menu.classList.add(this.active);
+            }else if ( this.menuState !== 0 ) {
+                this.menuState = 0;
+                menu.classList.remove(this.active);
+            }
+        },
+        changePlayerType: function (id, type){
+            this.ws.json({req: "changePlayerType", player: id, type: type});
         }
     }
 });

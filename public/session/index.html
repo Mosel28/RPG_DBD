@@ -29,8 +29,22 @@
             <div v-if="queueShown">
                 <div>
                     <div v-for="player in players">
-                        Name: <a>{{player.name}}</a>
+                        Name: <a v-if="isEntity" @click="toggleMenu(document.getElementById(player._id))">{{player.name}}</a><a v-else>{{player.name}}</a>
                         <button v-if="isEntity" @click="kickPlayer(player._id)">Kick</button>
+                        <nav class="context-menu" :id="player._id">
+                            <ul class="context-menu__items">
+                                <li class="context-menu__item">
+                                    <a class="context-menu__link"  @click="changePlayerType(player._id, 'killer')">
+                                        Make Killer
+                                    </a>
+                                </li>
+                                <li class="context-menu__item">
+                                    <a class="context-menu__link"  @click="changePlayerType(player._id, 'survivor')">
+                                        Make Survivor
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                     <div v-if="isEntity">
                         <div v-for="token in tokens">
@@ -44,24 +58,38 @@
         </div>
     </div>
     <div v-if="isEntity">
-        <div class="survivorStateBoard">
+        <div class="stateBoard">
+            <!-- State of each survivor (normal, first hooked, second hooked, dead on hook)-->
+            <h1>Killer State</h1>
+            <div>
+                <div v-for="player of killers">
+                    <a>{{player.name}}</a>
+                </div>
+            </div>
+        </div>
+        <div class="stateBoard">
             <!-- State of each survivor (normal, first hooked, second hooked, dead on hook)-->
             <h1>Survivor State</h1>
+            <div>
+                <div v-for="player of survivors">
+                    <a>{{player.name}}</a>
+                </div>
+            </div>
         </div>
 
-        <div class="generatorStateBoard">
+        <div class="stateBoard">
             <!-- Progress of each generator + Gates -->
             <h1>Generator State</h1>
             <!--EXAMPLECODE; REPLACE WITH VUE-->
         </div>
 
-        <div class="hookStateBoard">
+        <div class="stateBoard">
             <!-- Which hook is in use? When must the Entitus Kill the pres?-->
             <h1>Hook State</h1>
             <!--Examplecode-->
         </div>
 
-        <div class="controlls">
+        <div class="stateBoard">
             <!-- reset game. Kick player. Whatever makes sense -->
         </div>
     </div>
