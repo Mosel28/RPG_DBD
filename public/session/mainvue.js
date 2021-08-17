@@ -22,7 +22,8 @@ var reg = new Vue({
         ws: undefined
     },
     created: async function () {
-        readTag();
+        await setupNFC();
+        await readTag();
         this.watchLocation();
         this.ws = connectWs(this.handleMessage, function (reconnect) {
             reg.ws.json({req: "loadGame"});
@@ -150,25 +151,28 @@ var reg = new Vue({
     }
 });
 
-async function readTag() {
+var ndef;
+
+async function setupNFC(){
     if ("NDEFReader" in window) {
-        const ndef = new NDEFReader();
-        try {
-            await ndef.scan();
-            ndef.onreading = event => {
-                const decoder = new TextDecoder();
-                for (const record of event.message.records) {
-                    console.log("Record type:  " + record.recordType);
-                    console.log("MIME type:    " + record.mediaType);
-                    console.log("=== data ===\n" + decoder.decode(record.data));
-                }
-            }
-        } catch(error) {
-            console.log(error);
-        }
+        ndef = new NDEFReader();
     } else {
         console.log("Web NFC is not supported.");
     }
+
+    ndef.onreading = event => {
+        const decoder = new TextDecoder();
+        for (const record of event.message.records) {
+            console.log("Record type:  " + record.recordType);
+            console.log("MIME type:    " + record.mediaType);
+            console.log("=== data ===\n" + decoder.decode(record.data));
+        }
+    }
+}
+
+async function readTag() {
+    if(ndef !== undefined)
+        await ndef.scan();
 }
 
 async function writeTag() {
