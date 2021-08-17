@@ -97,26 +97,7 @@ router.ws('/', function (ws, req) {
                 const rule = new schedule.RecurrenceRule();
                 rule.second = 2;
                 const job = schedule.scheduleJob(rule, async function () {
-                    if (!isAuth(ws)) {
-                        console.log("disconnecting job");
-                        return job.cancel();
-                    }
-                    let killer = await getKiller(ws);
-                    let player = await getPlayer(ws);
-                    console.log(killer)
-                    console.log(player)
-                    if(killer === undefined || player === undefined)return;
-                    let distance = calculateDistance(killer.position[0], player.position[0], killer.position[1], player.position);
-                    console.log("distance: " + distance);
-                    if (distance <= 30) {
-                        if (distance <= 15) {
-                            ws.json({req: "terror", distance: 15});
-                        } else if(distance <= 30){
-                            ws.json({req: "terror", distance: 30});
-                        } else {
-                            ws.json({req: "terror", distance: -1});
-                        }
-                    }
+
                 });
                 break;
 
@@ -163,15 +144,41 @@ router.ws('/', function (ws, req) {
     });
 });
 
+async function sendTerrorRadius(){
+    if (!isAuth(ws)) {
+        console.log("disconnecting job");
+    }
+    let killer = await getKiller(ws);
+    let player = await getPlayer(ws);
+    console.log(killer)
+    console.log(player)
+    if(killer === undefined || player === undefined)return;
+    let distance = calculateDistance(killer.position[0], player.position[0], killer.position[1], player.position);
+    console.log("distance: " + distance);
+    if (distance <= 30) {
+        if (distance <= 15) {
+            ws.json({req: "terror", distance: 15});
+        } else if(distance <= 30){
+            ws.json({req: "terror", distance: 30});
+        } else {
+            ws.json({req: "terror", distance: -1});
+        }
+    }
+}
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    var R = 6371000; // km
-    var dLat = (lat2 - lat1).toRad();
-    var dLon = (lon2 - lon1).toRad();
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    var d = R * c;
+    const R = 6371e3; // metres
+    const l = lat1 * Math.PI/180; // φ, λ in radians
+    const y = lat2 * Math.PI/180;
+    const k = (lat2-lat1) * Math.PI/180;
+    const f = (lon2-lon1) * Math.PI/180;
+
+    const a = Math.sin(k/2) * Math.sin(k/2) +
+        Math.cos(l) * Math.cos(y) *
+        Math.sin(f/2) * Math.sin(f/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    const d = R * c; // in metres
     return d;
 }
 Number.prototype.toRad = function() {
