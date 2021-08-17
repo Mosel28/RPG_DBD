@@ -226,10 +226,10 @@ async function removeObstacle(ws, msg) {
 
 async function setup(ws, msg) {
     const session = await getSession(ws);
-    var tk = makeToken(10);
+    var tk = makeToken(5);
 
     while (await testUid(tk)) {
-        tk = makeToken(10);
+        tk = makeToken(5);
     }
     switch (msg.type) {
         case "generator": {
@@ -243,7 +243,6 @@ async function setup(ws, msg) {
             });
 
             await gen.save();
-
         }
             break;
 
