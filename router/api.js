@@ -106,7 +106,7 @@ router.ws('/', function (ws, req) {
                     console.log(killer)
                     console.log(player)
                     if(killer === undefined || player === undefined)return;
-                    let distance = Math.sqrt(Math.pow((killer.position[0] - player.position[0]), 2) + Math.pow((killer.position[1] - player.position[1]), 2));
+                    let distance = calculateDistance(killer.position[0], player.position[0], killer.position[1], player.position)*1000;
                     console.log("distance: " + distance);
                     if (distance <= 30) {
                         if (distance <= 15) {
@@ -162,6 +162,21 @@ router.ws('/', function (ws, req) {
         ws.close();
     });
 });
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    var R = 6371; // km
+    var dLat = (lat2 - lat1).toRad();
+    var dLon = (lon2 - lon1).toRad();
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+    return d;
+}
+Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+}
 
 async function changePlayerType(ws, msg) {
     if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
