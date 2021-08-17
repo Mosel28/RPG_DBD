@@ -92,13 +92,8 @@ router.ws('/', function (ws, req) {
             case "endGeneratorRepair":
                 break;
 
-            case "regTerrorRadius":
-                console.log("started");
-                const rule = new schedule.RecurrenceRule();
-                rule.second = 2;
-                const job = schedule.scheduleJob(rule, async function () {
-
-                });
+            case "terrorRadius":
+                sendTerrorRadius(ws);
                 break;
 
             case "auth":
