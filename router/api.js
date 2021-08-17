@@ -106,7 +106,7 @@ router.ws('/', function (ws, req) {
                     console.log(killer)
                     console.log(player)
                     if(killer === undefined || player === undefined)return;
-                    let distance = calculateDistance(killer.position[0], player.position[0], killer.position[1], player.position)*1000;
+                    let distance = calculateDistance(killer.position[0], player.position[0], killer.position[1], player.position);
                     console.log("distance: " + distance);
                     if (distance <= 30) {
                         if (distance <= 15) {
@@ -164,7 +164,7 @@ router.ws('/', function (ws, req) {
 });
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    var R = 6371; // km
+    var R = 6371000; // km
     var dLat = (lat2 - lat1).toRad();
     var dLon = (lon2 - lon1).toRad();
     var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
