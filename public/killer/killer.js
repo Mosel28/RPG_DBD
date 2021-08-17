@@ -10,7 +10,61 @@ let generatorProgress = 0;
 let notificationTimeout = 0;
 let notificationBox = document.getElementById("notification");
 let notificationBoxCaption = document.getElementById("caption");
-let notificationBoxMessage = document.getElementById("message")
+let notificationBoxMessage = document.getElementById("message");
+//Hook System
+let playerSelectedToHook = undefined;
+
+/*
+Vue Stuff UWU
+*/
+let playerSurvivor = []; //Hier kommen die Survivor rein
+
+/*  let hooks = [{
+      id: 1
+  }, {
+      id: 2
+  }]*/
+
+Vue.component('entry-component', { //global
+    //Optionen
+    props: ['entry', 'player'], //binden, verwendbar wie ein Datenatribut
+    template: `
+        <div class="playerCard">
+            <button @click="select(entry.name) ">{{entry.name}}</button>
+        </div>
+    `,
+    methods: {
+        select(playerName) {
+            selectPlayerToHook(playerName);
+        }
+    }
+
+});
+/*
+Vue.component('hook-component', { //global
+    //Optionen
+    props: ['hook', 'hooks'], //binden, verwendbar wie ein Datenatribut
+    template: `
+        <div class="playerCard">
+            <button @click="select(hook.id) ">{{hook.id}}</button>
+        </div>
+    `,
+    methods: {
+        select(playerName) {
+            selectPlayerToHook(playerName);
+        }
+    }
+
+});
+For Entity
+*/
+window.vue = new Vue({
+    el: '#root',
+    data: {
+        player: playerSurvivor
+    },
+
+})
 
 
 
@@ -35,8 +89,23 @@ function messageHandler(msg) {
         case 'notification':
             showNotification(msg.caption, msg.message);
             break;
+        case 'loadGame':
+            initUi(msg.playerData);
     }
 }
+
+//test 
+let data = [{ name: 'Nommit' }, { name: 'Strawberry' }, { name: 'Mindcollaps' }, { name: 'Mickey' }]
+initUi(data);
+
+function initUi(data) {
+    data.forEach(element => {
+        playerSurvivor.push(element)
+    });
+    //Array of {name: playername}
+    showNotification('Welcome to the Map', 'Map: Farm Besetze. Good Hunt!')
+}
+
 
 
 /**
@@ -93,6 +162,9 @@ Push Messages
 
 function showNotification(title, message) {
     clearMessages();
+    notificationBox = document.getElementById("notification");
+    notificationBoxCaption = document.getElementById("caption");
+    notificationBoxMessage = document.getElementById("message");
     notificationTimeout = 10;
     notificationBox.style.top = '0px';
     notificationBoxCaption.innerHTML = title;
@@ -102,7 +174,7 @@ function showNotification(title, message) {
 
 function resetMessageBoard() {
     if (notificationTimeout < 0) {
-        showNotification("Hook", "Nommit unhooked");
+        //showNotification("Hook", "Nommit unhooked");
         return;
     }
     if (notificationTimeout == 0) {
@@ -117,3 +189,29 @@ function clearMessages() {
 }
 
 setInterval(resetMessageBoard, 1000);
+
+
+/*
+Hook and selection to hook
+*/
+function selectPlayerToHook(playerName) {
+    if (playerName) {
+        playerSelectedToHook = playerName;
+    }
+}
+
+function clickHookPlayer() {
+    if (playerSelectedToHook) {
+        console.log(document.getElementById('hookNumber').value);
+        if (document.getElementById('hookNumber').value) {
+            socket.json({
+                req: 'hooked',
+                player: playerSelectedToHook
+            })
+            return;
+        }
+        showNotification('Mistake', 'You have to select the Hook');
+        return;
+    }
+    showNotification('Mistake', 'You have to select the Survivor first');
+}

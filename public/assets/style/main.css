@@ -186,10 +186,8 @@ h3 {
 }
 
 button {
-    display: inline-block;
-    margin: 30px;
-    width: 100px;
-    height: 100px;
+    width: max-content;
+    height: auto;
     background-color: #000000;
     border-radius: 30px;
     border-style: dotted;
@@ -201,13 +199,13 @@ button:focus {
     background-color: #660000;
 }
 
-.buttonBreak {
+.buttonGenerator {
     position: absolute;
     width: 40%;
     height: auto;
     right: 1rem;
-    top: 2rem;
-    bottom: 2rem;
+    top: 4rem;
+    bottom: 3rem;
 }
 
 .playerCard {
@@ -300,8 +298,8 @@ button:focus {
     position: absolute;
     left: 0%;
     right: 0%;
-    top: 25%;
-    height: 25%;
+    bottom: 35%;
+    height: 40%;
     border-style: dashed;
     border-color: #5555;
     border-width: 3px;
@@ -312,7 +310,7 @@ button:focus {
     left: 0%;
     right: 0%;
     bottom: 0%;
-    height: 30%;
+    height: 35%;
     border-style: dashed;
     border-color: #5555;
     border-width: 3px;
@@ -390,6 +388,15 @@ html {
     align-content: center;
 }
 
+.buttonHook {
+    position: absolute;
+    height: auto;
+    top: 9rem;
+    width: 40%;
+    right: 1rem;
+    bottom: 2rem;
+}
+
 .progressBar {
     position: absolute;
     left: 10%;
@@ -402,7 +409,7 @@ html {
 .notificationBoard {
     text-align: center;
     position: absolute;
-    top: -30%;
+    top: -5%;
     left: 0%;
     right: 0%;
     height: 15%;
@@ -450,4 +457,26 @@ html {
     border-style: dashed;
     border-color: #5555;
     border-width: 3px;
+}
+
+.nfcControll {
+    float: center;
+    padding: 1rem;
+    margin: auto;
+}
+
+.textFieldHookNumber {
+    width: auto;
+}
+
+.column {
+    min-height: 20%;
+    height: max-content;
+    float: left;
+    width: 50%;
+    box-sizing: border-box;
+}
+
+.playerCard {
+    height: max-content;
 }

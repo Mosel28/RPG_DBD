@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
     <link rel="stylesheet" href="/assets/style/main.css">
     <title>Killerboard</title>
 </head>
@@ -24,31 +25,52 @@
         <div class="hookControll">
             <!--Report hooking of player (Entituts and Death Timer need to know this)-->
             <h1>Hook Control</h1>
+            <div class="column">
+                <div v-for="entry in player">
+                    <entry-component v-bind:entry="entry" :entries="player">
+                    </entry-component>
+                </div>
+
+                <!--
+                <div class=" playerCard ">
+                    <button>Nommit</button>
+                </div>
+                <div class="playerCard ">
+                    <button>Mindcollaps</button>
+                </div>
+                <div class="playerCard ">
+                    <button>Strawberry</button>
+                </div>
+                <div class="playerCard ">
+                    <button>Doro</button>
+                </div>
+                -->
+            </div>
+            <div class="column ">
+                <div class="nfcControll ">
+                    <input type="number " name=" " id="hookNumber" class="textFieldHookNumber ">
+                    <button class="buttonHook" onclick="clickHookPlayer()">OK</button>
+                </div>
+            </div>
 
             <!--ONLY EXAMPLE CODE, DO THIS WITH VUE -->
-            <button class="playerCard">Kevin</button>
-            <button class="playerCard">Jasmin</button>
-            <button class="playerCard">Anna</button>
         </div>
 
-        <div class="generatorBreakControll">
+        <div class="generatorBreakControll ">
             <!--Breaking the generator-->
             <h1>Generator Control</h1>
-            <div class="progressBar" id="progressBar"></div>
-            <button onclick="clickSpamGenerator()" class="buttonBreak">Break</button>
+            <div class="progressBar " id="progressBar "></div>
+            <button onclick="clickSpamGenerator() " class="buttonGenerator ">Break</button>
         </div>
 
     </div>
 
 
-    <script src="https://unpkg.com/vue">
+    <script src="https://unpkg.com/vue ">
     </script>
     <script>
-        window.vue = new Vue({
-            el: '#root'
-        })
     </script>
-    <script src="./killer.js"></script>
+    <script src="./killer.js "></script>
 </body>
 
 </html>

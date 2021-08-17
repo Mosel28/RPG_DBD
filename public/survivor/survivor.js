@@ -51,11 +51,21 @@ function messageHandler(msg) {
             break;
         case 'attemptSkillCheck':
             initSkillCheck(msg.difficulty);
+            break
+        case 'loadGame':
+            initUi();
     }
 }
 
 let socket = connectWs(messageHandler);
 
+
+initUi();
+
+function initUi() {
+    //Array of {name: playername}
+    showNotification('Welcome to the Map', 'Map: Farm Besetze. Good Luck!')
+}
 
 /*
  * Constant push of geolocation
@@ -323,7 +333,7 @@ function showNotification(title, message) {
 
 function resetMessageBoard() {
     if (notificationTimeout < 0) {
-        showNotification("Hook", "Nommit hooked");
+        //       showNotification("Hook", "Nommit hooked");
         return;
     }
     if (notificationTimeout == 0) {
