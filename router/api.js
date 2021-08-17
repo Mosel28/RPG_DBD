@@ -139,7 +139,7 @@ router.ws('/', function (ws, req) {
     });
 });
 
-async function sendTerrorRadius(){
+async function sendTerrorRadius(ws){
     if (!isAuth(ws)) {
         console.log("disconnecting job");
     }
