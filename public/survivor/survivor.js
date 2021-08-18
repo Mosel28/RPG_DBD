@@ -30,8 +30,12 @@ let notificationTimeout = 0;
 let notificationBox = document.getElementById("notification");
 let notificationBoxCaption = document.getElementById("caption");
 let notificationBoxMessage = document.getElementById("message");
+//Init
+let initialised = false;
 //Hooked Player
 let hookedPlayerList = [] //array of {name: 'Name'}
+    //audio
+const soundTerrorRadius = new Audio('/assets/sounds/terrorradius.mp3');
 
 
 Vue.component('entry-component', { //global
@@ -103,9 +107,6 @@ let socket = connectWs(messageHandler);
 //TEST 
 
 
-
-initUi();
-
 hooked({ name: 'Mindcollaps' })
 
 hooked({ name: 'Mindcollaps' })
@@ -115,6 +116,10 @@ hooked({ name: 'Mindcollaps' })
 function initUi() {
     //Array of {name: playername}
     showNotification('Welcome to the Map', 'Map: Farm Besetze. Good Luck!')
+        //Audio
+
+    playTerrorRadius(0);
+    soundTerrorRadius.play();
 }
 
 /*
@@ -190,6 +195,15 @@ function playSound(filename) {
     const sound = new Audio(filename);
     sound.play();
 }
+let hurz = 30;
+
+setInterval(updateTerrorRadius, 500)
+
+function playTerrorRadius(volume) {
+    soundTerrorRadius.loop = true;
+    soundTerrorRadius.volume = volume;
+    soundTerrorRadius.playbackRate = volume + 0.5
+}
 
 /*
 Update Gui
@@ -228,8 +242,17 @@ function updateCompass(latitude, longitude) {
  * Increases and decreases the volume of the terror radius sound
  */
 function updateTerrorRadius(distance) {
-    let volume = Math.floor(1 / distance * 12) / 10 - .2; //maybe a bad idea
+
+    distance = (hurz--);
+    if (distance < 1)
+        return;
+    let volume = Math.floor(30 / distance + 0.3) * 2 / 10 - 0.2; //maybe a bad idea
+
+    if (volume > 1)
+        volume = 1;
+
     console.warn("Terrorradius not implemented (distance, volume)", distance, volume);
+    playTerrorRadius(volume);
 }
 
 /*
@@ -352,6 +375,10 @@ function initGeneratorTask(pGeneratorID, pGeneratorProgress, pPlayerFaktor) { //
 
 function clickSpamGenerator() { //button repair clicked
     generatorClickSpam = true;
+    if (!initialised) {
+        initUi();
+        initialised = true;
+    }
     //pushGeoLocation();
 }
 
