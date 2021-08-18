@@ -24,6 +24,7 @@ let skillCheckSucessArea = document.getElementById("skillCheckSucessArea");
 let generatorID = -1; //
 let generatorTimeOut = 5; //Time until you have to rescan NFC Code
 let generatorClickSpam = false; //true if clicked 
+let generatorTaskPlayerFaktor = 0;
 //Notifications
 let notificationTimeout = 0;
 let notificationBox = document.getElementById("notification");
@@ -64,6 +65,9 @@ function messageHandler(msg) {
     console.log(msg.req);
 
     switch (msg.req) {
+        case "startGeneratorRepair":
+            initGeneratorTask(msg.generator, msg.progress, msg.players);
+
         case 'generatorProgress':
             updateGeneratorProgress(msg.progress);
             break;
@@ -308,7 +312,6 @@ function clickSkillCheck() {
         stopSkillCheck();
         playSoundSkillCheckFail();
 
-
         socket.json({
             req: "generatorFailCheck",
             generator: generatorID
@@ -321,8 +324,11 @@ function clickSkillCheck() {
 /*
 Generator Task
 */
-function initGeneratorTask(gpeneratorID) { //if NFC chick scanned, plz here enter @Noah
+function initGeneratorTask(pGeneratorID, pGeneratorProgress, pPlayerFaktor) { //if NFC chick scanned, plz here enter @Noah
     generatorID = pGeneratorID;
+    generatorProgress = pGeneratorProgress;
+    generatorTaskPlayerFaktor = pPlayerFaktor;
+
     generatorTimeOut = 10;
     socket.json({
         req: "regGeneratorRepair"
@@ -345,9 +351,17 @@ function updateGeneratorTask() {
         })
 
     if (generatorClickSpam) {
+        generatorProgress = generatorProgress + generatorTaskPlayerFaktor;
+        updateGeneratorProgress();
         generatorClickSpam = false;
         generatorTimeOut = 5;
+        socket.json({
+            req: "regGeneratorRepair"
+        })
     } else {
+        socket.json({
+            req: "endGeneratorRepair"
+        })
         generatorTimeOut--;
     }
     console.log("Clickspam Generator Active")
