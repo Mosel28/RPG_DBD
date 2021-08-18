@@ -4,14 +4,10 @@ var reg = new Vue({
         players: [],
         killers: [],
         survivors: [],
-        hooks: "",
-        gameShown: false,
-        createGameShown: false,
-        queueShown: false,
+
+        hooks: [],
         gameKey: "",
         tokens: [],
-        isEntity: false,
-        message: "",
         shown: false,
         menuState: 0,
         active: "context-menu--active",
@@ -19,12 +15,33 @@ var reg = new Vue({
         latitude: 0,
         longitude: 0,
         isPositionGranted: false,
+
+        gameShown: false,
+        createGameShown: false,
+        queueShown: false,
+
+        isEntity: false,
+        isKiller: false,
+        isSurvivor: false,
+
+        generatorId: 0,
+        generatorTimeOut: 5,
+        generatorClickSpam: false,
+        generatorProgress: 0,
+
+        notificationTimeout: 0,
+
+        playerSelectedToHook: undefined,
+
+        message: "",
+        messageHeadline: "",
+        messageTopStyle: "top: -30%",
+        messageTimeout: 0,
+
+        damageBar: '0%',
         ws: undefined
     },
     created: async function () {
-        await setupNFC();
-        await readTag();
-        this.watchLocation();
         this.ws = connectWs(this.handleMessage, function (reconnect) {
             reg.ws.json({req: "loadGame"});
         });
@@ -45,9 +62,13 @@ var reg = new Vue({
                         this.createGameShown = true;
                         this.gameShown = false;
                         this.isEntity = false;
+                        this.isKiller = false;
+                        this.isSurvivor = false;
                         this.shown = true;
                     } else {
                         this.isEntity = msg.isEntity;
+                        this.isSurvivor = msg.isSurvivor;
+                        this.isKiller = msg.isKiller;
                         if (msg.state === 1) {
                             this.queueShown = true;
                             this.createGameShown = false;
@@ -58,6 +79,8 @@ var reg = new Vue({
                             this.createGameShown = false;
                             this.gameShown = true;
                             this.shown = false;
+                            if (!this.isEntity)
+                                this.watchLocation();
                         }
 
                         this.gameState = msg.state;
@@ -91,12 +114,16 @@ var reg = new Vue({
                     break;
 
                 case "print":
-                    this.message = msg.message;
+                    this.showMessage(msg.headline, msg.message);
+                    break;
+
+                case 'coords':
+                    this.updateCompass(msg.latitude, msg.longitude);
+                    break;
+                case 'notification':
+                    this.showNotification(msg.caption, msg.message);
                     break;
             }
-        },
-        sendPosition: function () {
-            reg.ws.json({req: "updatePos", position: [this.latitude, this.longitude]});
         },
         createGame: function () {
             this.ws.json({req: "createGame"});
@@ -128,6 +155,10 @@ var reg = new Vue({
         geoSuccess: function (position) {
             this.latitude = position.coords.latitude;
             this.longitude = position.coords.longitude;
+            this.ws.json({
+                req: "updatePos",
+                position: [position.coords.latitude, position.coords.longitude]
+            });
         },
         geoError: function (error) {
 
@@ -145,55 +176,61 @@ var reg = new Vue({
             };
             navigator.geolocation.watchPosition(this.geoSuccess, this.geoError, geo_options);
         },
-        startNfc: function () {
+        updateGeneratorProgress: function updateGeneratorProgress(percent) //(0...100)
+        {
+            if (percent < 0 || percent > 100) {
+                console.exception("Was soll die Scheise? Kannst du nicht bis 100 zählen im Zahlenraum N??")
+            }
+            let progress = 80 / 100 * percent;
+            this.damageBar = progress + '%';
+        },
+        updateGeneratorTask: function () {
+            if (this.generatorID == -1 || this.generatorTimeOut <= -1 || this.generatorProgress >= 100)
+                return;
 
+            if (this.generatorClickSpam) {
+                this.generatorClickSpam = false;
+                this.generatorTimeOut = 5;
+            } else {
+                this.generatorTimeOut--;
+            }
+            this.generatorProgress++;
+            this.updateGeneratorProgress(generatorProgress);
+            if (this.generatorProgress >= 100) {
+                console.log("Killer has damaged generator")
+                socket.json({
+                    req: "damageGenerator"
+                });
+            }
+        },
+        selectHookedPlayer: function (id) {
+            this.playerSelectedToHook = id;
+        },
+        clearMessages: function () {
+            this.message = "";
+            this.messageHeadline = "";
+            this.messageTopStyle = "top: -30%";
+        },
+        showMessage: function (headline, message){
+            this.clearMessages();
+            this.messageTimeout = 10;
+            this.message = message;
+            this.messageHeadline = headline;
+            this.messageTopStyle = "top: 0px";
+            this.messageTimer();
+        },
+        messageTimer: function (){
+            setTimeout(function (){
+                if(reg.messageTimeout > 0){
+                    reg.messageTimeout --;
+                    reg.messageTimer();
+                } else {
+                    reg.clearMessages();
+                }
+            }, 1000);
+        },
+        startGame: function (){
+            this.ws.json({req: "startGame"});
         }
     }
 });
-
-var ndef;
-
-async function setupNFC() {
-    try {
-        if ("NDEFReader" in window) {
-            ndef = new NDEFReader();
-        } else {
-            console.log("Web NFC is not supported.");
-        }
-
-        if (ndef !== undefined)
-            ndef.onreading = event => {
-                const decoder = new TextDecoder();
-                for (const record of event.message.records) {
-                    console.log("Record type:  " + record.recordType);
-                    console.log("MIME type:    " + record.mediaType);
-                    console.log("=== data ===\n" + decoder.decode(record.data));
-                }
-            }
-    } catch (e) {
-        console.log(e);
-    }
-}
-
-async function readTag() {
-    try {
-        if (ndef !== undefined)
-            await ndef.scan();
-    }catch (e){
-        console.log(e);
-    }
-}
-
-async function writeTag() {
-    if ("NDEFReader" in window) {
-        const ndef = new NDEFReader();
-        try {
-            await ndef.write("What Web Can Do Today");
-            console.log("NDEF message written!");
-        } catch (error) {
-            console.log(error);
-        }
-    } else {
-        console.log("Web NFC is not supported.");
-    }
-}

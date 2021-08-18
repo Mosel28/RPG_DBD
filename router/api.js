@@ -81,19 +81,27 @@ router.ws('/', function (ws, req) {
                 break;
 
             case "generatorFailCheck":
+                genFailCheck(ws);
                 break;
 
             case "damageGenerator":
+                damageGenerator(ws, msg);
                 break;
 
             case "regGeneratorRepair":
+                regGeneratorRepair(ws, msg);
                 break;
 
             case "endGeneratorRepair":
+                endGeneratorRepair(ws);
                 break;
 
             case "terrorRadius":
                 sendTerrorRadius(ws);
+                break;
+
+            case "startGame":
+                startGame(ws, msg);
                 break;
 
             case "auth":
@@ -139,21 +147,110 @@ router.ws('/', function (ws, req) {
     });
 });
 
-async function sendTerrorRadius(ws){
-    if (!isAuth(ws)) {
-        console.log("disconnecting job");
-    }
+async function regGeneratorRepair(ws, msg) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    const generator = await Generator.findOne({uid: msg.generator});
+    const player = await getPlayer(ws);
+    if (!generator) return;
+    if (!player) return;
+
+    if (generator.finished) return;
+    if(player.repairingGenerator !== undefined)return;
+
+    player.repairingGenerator = generator._id;
+    generator.damaged = false;
+
+    await generator.save();
+    await player.save();
+    generatorProgressTimer(ws, generator._id);
+    generatorSkillTimer(ws, generator);
+    const players = await Player.find({repairingGenerator: generator._id});
+
+    ws.json({
+        req: "startGeneratorRepair",
+        generator: generator.uid,
+        progress: generator.progress,
+        players: players.length
+    });
+}
+
+async function generatorProgressTimer(ws, generator) {
+    setTimeout(async function () {
+        const player = await getPlayer(ws);
+        const generator = await Generator.findOne({_id: generator});
+        if (player.repairingGenerator === generator) {
+            if (!generator.finished) {
+                generator.progress = generator.progress + 1;
+                generatorProgressTimer(ws, generator);
+            }
+        }
+    }, 1000);
+}
+
+async function generatorSkillTimer(ws, generator) {
+    setTimeout(async function () {
+        const player = await getPlayer(ws);
+        if (player.repairingGenerator === generator) {
+            ws.json({req: "attemptSkillCheck"});
+            generatorSkillTimer(ws);
+        }
+    }, getRandomInt(10, 40) * 1000);
+}
+
+async function genFailCheck(ws) {
+    const player = await getPlayer(ws);
+    if (!player) return;
+    const generator = await Generator.findOne({_id: player.repairingGenerator});
+    if (!generator) return;
+    await makeDamageOnGen(ws, generator, 5);
+}
+
+async function damageGenerator(ws, msg) {
+    const player = await getPlayer(ws);
+    if (!player) return;
+    const generator = await Generator.findOne({uid: msg.generator});
+    if (!generator) return;
+    await makeDamageOnGen(ws, generator, 10);
+}
+
+async function makeDamageOnGen(ws, gen, damage) {
+    if (gen.progress - damage <= 0)
+        gen.progress = 0;
+    else
+        gen.progress = gen.progress - damage;
+
+    await gen.save();
+    const players = await Player.find({repairingGenerator: gen._id});
+    await sendJsonToAllMembersOnGen(ws, gen, {
+        req: "startGeneratorRepair",
+        generator: gen.uid,
+        progress: gen.progress,
+        players: players.length
+    });
+}
+
+async function endGeneratorRepair(ws) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    const player = await getPlayer(ws);
+    if (!player) return;
+    player.repairingGenerator = undefined;
+    await player.save();
+}
+
+async function sendTerrorRadius(ws) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+
     let killer = await getKiller(ws);
     let player = await getPlayer(ws);
     console.log(killer)
     console.log(player)
-    if(killer === undefined || player === undefined)return;
+    if (killer === undefined || player === undefined) return;
     let distance = calculateDistance(killer.position[0], player.position[0], killer.position[1], player.position);
     console.log("distance: " + distance);
     if (distance <= 30) {
         if (distance <= 15) {
             ws.json({req: "terror", distance: 15});
-        } else if(distance <= 30){
+        } else if (distance <= 30) {
             ws.json({req: "terror", distance: 30});
         } else {
             ws.json({req: "terror", distance: -1});
@@ -163,20 +260,21 @@ async function sendTerrorRadius(ws){
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // metres
-    const l = lat1 * Math.PI/180; // φ, λ in radians
-    const y = lat2 * Math.PI/180;
-    const k = (lat2-lat1) * Math.PI/180;
-    const f = (lon2-lon1) * Math.PI/180;
+    const l = lat1 * Math.PI / 180; // φ, λ in radians
+    const y = lat2 * Math.PI / 180;
+    const k = (lat2 - lat1) * Math.PI / 180;
+    const f = (lon2 - lon1) * Math.PI / 180;
 
-    const a = Math.sin(k/2) * Math.sin(k/2) +
+    const a = Math.sin(k / 2) * Math.sin(k / 2) +
         Math.cos(l) * Math.cos(y) *
-        Math.sin(f/2) * Math.sin(f/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        Math.sin(f / 2) * Math.sin(f / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     const d = R * c; // in metres
     return d;
 }
-Number.prototype.toRad = function() {
+
+Number.prototype.toRad = function () {
     return this * Math.PI / 180;
 }
 
@@ -226,10 +324,10 @@ async function removeObstacle(ws, msg) {
 
 async function setup(ws, msg) {
     const session = await getSession(ws);
-    var tk = makeToken(5);
+    var tk = makeToken(3, true, false, false);
 
     while (await testUid(tk)) {
-        tk = makeToken(5);
+        tk = makeToken(3, true, false, false);
     }
     switch (msg.type) {
         case "generator": {
@@ -270,6 +368,28 @@ async function setup(ws, msg) {
             break;
     }
     await sendJsonToEntity(ws, {req: "reload"}, session._id);
+}
+
+async function startGame(ws, msg) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (!await isEntity(ws)) return ws.json({req: "authstatus", status: 4011});
+
+    const session = await getSession(ws);
+    if (!session.setupDone) return ws.json({
+        req: "print",
+        message: "The setup is not done yet, please enter the setup page to finish the setup process!",
+        headline: "Error"
+    });
+
+    session.state = 0;
+    await session.save();
+
+    await sendJsonToAllSessionMembers(ws, {
+        req: "print",
+        message: "The entity has started the game! Have fun!",
+        headline: "Game start"
+    });
+    await sendJsonToAllSessionMembers(ws, {req: "reload"});
 }
 
 async function testUid(uid) {
@@ -332,6 +452,8 @@ async function loadGame(ws, msg) {
     if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
     const session = await getSession(ws);
 
+    const player = await getPlayer(ws);
+
     if (await isEntity(ws)) {
         if (session.state == 1) {
             await sendTokens(ws);
@@ -346,19 +468,21 @@ async function loadGame(ws, msg) {
             state: session.state,
             isEntity: true
         });
-    } else if (getPlayer(ws).isSurvivor) {
+    } else if (!player) {
+        ws.json({req: "loadGame", game: "undefined"});
+    } else if (player.isSurvivor) {
         if (session.state == 1) {
-            await loadQueueGame(ws, msg, session._id, false);
+            await loadQueueGame(ws, msg, session._id, false, true, false);
         } else
             ws.json({req: "loadGame", game: "survivor"});
-    } else if (getPlayer(ws).isKiller) {
+    } else if (player.isKiller) {
         if (session.state == 1) {
-            await loadQueueGame(ws, msg, session._id, false);
+            await loadQueueGame(ws, msg, session._id, false, false, true);
         } else
             ws.json({req: "loadGame", game: "killer"});
-    } else if (await getPlayer(ws)) {
+    } else if (player) {
         if (session.state == 1) {
-            await loadQueueGame(ws, msg, session._id, false);
+            await loadQueueGame(ws, msg, session._id, false, false, false);
         } else
             ws.json({req: "loadGame", game: "queue"});
     } else {
@@ -366,13 +490,21 @@ async function loadGame(ws, msg) {
     }
 }
 
-async function loadQueueGame(ws, msg, sessionid, isEntity) {
+async function loadQueueGame(ws, msg, sessionid, isEntity, isSurvivor, isKiller) {
     const session = await Session.findOne({_id: sessionid});
-    ws.json({req: "loadGame", game: {players: await getPlayerData(ws)}, state: session.state, isEntity: isEntity});
+    ws.json({
+        req: "loadGame",
+        game: {players: await getPlayerData(ws)},
+        state: session.state,
+        isEntity: isEntity,
+        isKiller: isKiller,
+        isSurvivor: isSurvivor
+    });
 }
 
 async function updatePos(ws, msg) {
     if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (ws.player === undefined) return ws.json({req: "authstatus", status: 4011});
     const player = await Player.findOne({_id: ws.player._id});
     if (!player) return;
     player.position = msg.position;
@@ -405,7 +537,7 @@ async function createToken(ws, msg) {
 
     var tk;
     while (true) {
-        tk = makeToken(5);
+        tk = makeToken(5, true, false, true);
         const testToken = await Token.find({token: tk});
         if (testToken.length === 0) break;
     }
@@ -460,7 +592,8 @@ async function getPlayerData(ws) {
         player.usr = await User.findOne({_id: player.user});
         if (isEnt)
             playerlist.push({
-                name: player.usr.username, isKiller: player.isKiller, isSurvivor: player.isSurvivor, _id: player._id});
+                name: player.usr.username, isKiller: player.isKiller, isSurvivor: player.isSurvivor, _id: player._id
+            });
         else
             playerlist.push({name: player.usr.username, isKiller: player.isKiller, isSurvivor: player.isSurvivor});
     }
@@ -493,11 +626,11 @@ async function register(ws, message) {
         errmsg += "The password should have a least 8 characters";
         err = true;
     }
-    if(message.password.length > 30){
+    if (message.password.length > 30) {
         errmsg += "The password should not have more than 30 characters\n";
         err = true;
     }
-    if(message.username.length > 30){
+    if (message.username.length > 30) {
         errmsg += "The username should not have more than 30 characters\n";
         err = true;
     }
@@ -576,6 +709,14 @@ async function sendJsonToAllSessionMembers(ws, msg, sessionid) {
     await sendJsonToEntity(ws, msg, sessionid);
 }
 
+async function sendJsonToAllMembersOnGen(ws, gen, msg) {
+    for (let i = 0; i < authCons.length; i++) {
+        if (authCons[i].player != undefined)
+            if (authCons[i].player.repairingGenerator === gen._id)
+                authCons[i].json(msg);
+    }
+}
+
 async function sendJsonToEntity(ws, msg, sessionid) {
     if (await isEntity(ws)) {
         ws.json(msg);
@@ -632,14 +773,31 @@ async function hashPw(pw) {
     return hashPassword;
 }
 
-function makeToken(length) {
+function makeToken(length, capital, small, number) {
     var result = '';
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var characters = '';
+    var capitals = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    var smalls = 'abcdefghijklmnopqrstuvwxyz';
+    var numbers = '0123456789';
+
+    if (capital)
+        characters += capitals;
+    if (small)
+        characters += smalls;
+    if (number)
+        characters += numbers;
+
     var charactersLength = characters.length;
     for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
+}
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
 }
 
 module.exports = router;

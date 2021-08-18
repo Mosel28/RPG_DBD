@@ -433,6 +433,7 @@ html {
     border-width: 3px;
     background-color: #202022;
     transition: 0.5s;
+    z-index: 101;
 }
 
 .skillcheck {

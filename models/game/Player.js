@@ -17,6 +17,14 @@ const player = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    repairingGenerator: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: undefined
+    },
+    openingExitGate: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: undefined
+    },
     user: mongoose.Schema.Types.ObjectId
 });
 

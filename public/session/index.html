@@ -15,12 +15,15 @@
 <body>
 
 <div class="root" id="entity">
-    <a id="test"></a>
+    <div class="notificationBoard" :style="messageTopStyle" @click="clearMessages">
+        <h1>{{messageHeadline}}</h1>
+        <h2>{{message}}</h2>
+    </div>
     <button class="fixedBtn" v-if="!shown" @click="toggleQueue">Queue</button>
     <div v-if="shown" class="editbox">
         <div class="ct">
-            <button v-if="!queueShown && !createGameShown || isEntity" class="fixedBtn" @click="toggleQueue">Close</button>
-            <div class="advice" v-if="message.length > 0"><a>{{message}}</a></div>
+            <button v-if="!queueShown && !createGameShown || isEntity" class="fixedBtn" @click="toggleQueue">Close
+            </button>
             <div v-if="createGameShown">
                 <button @click="createGame">Create Game</button>
                 <a>Or join a game</a>
@@ -29,19 +32,19 @@
             </div>
             <div v-if="queueShown">
                 <div>
-                    <button @click="sendPosition">Send</button>
                     <div v-for="player in players">
-                        Name: <a v-if="isEntity" @click="toggleMenu(document.getElementById(player._id))">{{player.name}}</a><a v-else>{{player.name}}</a>
+                        Name: <a v-if="isEntity"
+                                 @click="toggleMenu(document.getElementById(player._id))">{{player.name}}</a><a v-else>{{player.name}}</a>
                         <button v-if="isEntity" @click="kickPlayer(player._id)">Kick</button>
                         <nav class="context-menu" :id="player._id">
                             <ul class="context-menu__items">
                                 <li class="context-menu__item">
-                                    <a class="context-menu__link"  @click="changePlayerType(player._id, 'killer')">
+                                    <a class="context-menu__link" @click="changePlayerType(player._id, 'killer')">
                                         Make Killer
                                     </a>
                                 </li>
                                 <li class="context-menu__item">
-                                    <a class="context-menu__link"  @click="changePlayerType(player._id, 'survivor')">
+                                    <a class="context-menu__link" @click="changePlayerType(player._id, 'survivor')">
                                         Make Survivor
                                     </a>
                                 </li>
@@ -54,7 +57,14 @@
                         </div>
                         <button @click="createToken">Create token</button>
                     </div>
+                    <button @click="startGame">Start game</button>
                     <button @click="quit">Quit</button>
+                </div>
+            </div>
+            <div v-if="gameShown">
+                <div v-for="player in players">
+                    Name: <a>{{player.name}}</a>
+                    <button v-if="isEntity" @click="kickPlayer(player._id)">Kick</button>
                 </div>
             </div>
         </div>
@@ -93,6 +103,32 @@
 
         <div class="stateBoard">
             <!-- reset game. Kick player. Whatever makes sense -->
+        </div>
+    </div>
+    <div v-if="isKiller && gameShown">
+        <div class="hookControll">
+            <!--Report hooking of player (Entituts and Death Timer need to know this)-->
+            <h1>Hook Control</h1>
+            <div class="column">
+                <div v-for="entry in survivors" class="playerCard">
+                    <button @click="selectHookedPlayer(entry._id)">{{entry.name}}</button>
+                </div>
+            </div>
+            <div class="column ">
+                <div class="nfcControll ">
+                    <input type="number " name=" " id="hookNumber" class="textFieldHookNumber ">
+                    <button class="buttonHook" onclick="clickHookPlayer()">OK</button>
+                </div>
+            </div>
+
+            <!--ONLY EXAMPLE CODE, DO THIS WITH VUE -->
+        </div>
+
+        <div class="generatorBreakControll ">
+            <!--Breaking the generator-->
+            <h1>Generator Control</h1>
+            <div class="progressBar " id="progressBar "></div>
+            <button onclick="clickSpamGenerator() " class="buttonGenerator ">Break</button>
         </div>
     </div>
 
