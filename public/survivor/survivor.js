@@ -339,12 +339,14 @@ function updateGeneratorTask() {
     if (generatorID == -1 || generatorTimeOut <= -1)
         return;
 
-    if (generatorClickSpam) {
-        generatorClickSpam = false;
-        generatorTimeOut = 5;
+    if (generatorTimeOut == 0)
         socket.json({
             req: "endGeneratorRepair"
         })
+
+    if (generatorClickSpam) {
+        generatorClickSpam = false;
+        generatorTimeOut = 5;
     } else {
         generatorTimeOut--;
     }
