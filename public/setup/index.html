@@ -16,12 +16,13 @@
 
 <div class="root" id="entity">
     <div v-if="ready">
+        <button class="fixedBtn" style="top: 4rem" @click="window.location.replace('/session')">Session</button>
       <div>
         <h1>Hooks</h1>
         <div>
           <div v-for="hook in game.hooks">
             <a class="ready" v-if="hook.setup">{{hook.uid}}</a><a class="unready" v-if="!hook.setup">{{hook.uid}}</a>
-            <button v-if="!hook.setup">Setup</button><button @click="removeHook(hook._id)">Remove</button>
+              <button v-if="!hook.setup" @click="finishSetup('hook', hook._id)">Setup</button><button v-if="hook.setup" @click="undoSetup('hook', hook._id)">Setup mode</button><button @click="removeHook(hook._id)">Remove</button>
           </div>
         </div>
         <button @click="createHook">Create Hook on Location</button>
@@ -31,7 +32,7 @@
             <div>
                 <div v-for="gen in game.generators">
                     <a class="ready" v-if="gen.setup">{{gen.uid}}</a><a class="unready" v-if="!gen.setup">{{gen.uid}}</a>
-                    <button v-if="!gen.setup">Setup</button><button @click="removeGen(gen._id)">Remove</button>
+                    <button v-if="!gen.setup" @click="finishSetup('generator', gen._id)">Setup</button><button v-if="gen.setup" @click="undoSetup('generator', gen._id)">Setup mode</button><button @click="removeGen(gen._id)">Remove</button>
                 </div>
             </div>
             <button @click="createGen">Create Generator on Location</button>
@@ -41,7 +42,7 @@
             <div>
                 <div v-for="gate in game.exitGates">
                     <a class="ready" v-if="gate.setup">{{gate.uid}}</a><a class="unready" v-if="!gate.setup">{{gate.uid}}</a>
-                    <button v-if="!gate.setup">Setup</button> <button @click="removeGate(gate._id)">Remove</button>
+                    <button v-if="!gate.setup" @click="finishSetup('exitGate', gate._id)">Setup</button><button v-if="gate.setup" @click="undoSetup('exitGate', gate._id)">Setup mode</button><button @click="removeGate(gate._id)">Remove</button>
                 </div>
             </div>
             <button @click="createExit">Create Exit on Location</button>

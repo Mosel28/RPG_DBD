@@ -46,6 +46,10 @@ body {
     --te: cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
+[v-cloak]{
+    display: none;
+}
+
 .context-menu {
     display: none;
     position: absolute;

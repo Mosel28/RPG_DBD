@@ -72,6 +72,14 @@ router.ws('/', function (ws, req) {
                 setup(ws, msg);
                 break;
 
+            case "finishSetup":
+                finishSetup(ws, msg, true);
+                break;
+
+            case "undoSetup":
+                finishSetup(ws, msg, false);
+                break;
+
             case "removeObstacle":
                 removeObstacle(ws, msg);
                 break;
@@ -102,6 +110,14 @@ router.ws('/', function (ws, req) {
 
             case "startGame":
                 startGame(ws, msg);
+                break;
+
+            case "hooked":
+                hookPlayer(ws, msg, false);
+                break;
+
+            case "unhooked":
+                unhookPlayer(ws, msg);
                 break;
 
             case "auth":
@@ -147,44 +163,174 @@ router.ws('/', function (ws, req) {
     });
 });
 
-async function regGeneratorRepair(ws, msg) {
+async function unhookPlayer(ws, msg) {
     if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
-    const generator = await Generator.findOne({uid: msg.generator});
+    if (!await isSurvivor(ws)) return;
+
+    const session = await getSession(ws);
     const player = await getPlayer(ws);
-    if (!generator) return;
-    if (!player) return;
+    const hooked = await Player.findOne({_id: msg.player});
+    if (!hooked) return;
+    const hook = await Hook.findOne({uid: msg.hook});
 
-    if (generator.finished) return;
-    if(player.repairingGenerator !== undefined)return;
+    if (hook.hookedSurvivor === hooked._id) {
+        hook.hookedSurvivor = undefined;
+        hooked.hookTimer = 0;
 
-    player.repairingGenerator = generator._id;
-    generator.damaged = false;
+        await hook.save();
+        await hooked.save();
 
-    await generator.save();
+        await sendJsonToAllSessionMembers(ws, {
+            req: "print",
+            message: hooked.username + " was removed from the hook ",
+            headline: "Unhook"
+        }, session._id);
+    }
+}
+
+async function hookPlayer(ws, msg, stateChange) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (!await isKiller(ws)) return;
+
+    const session = await getSession(ws);
+    const player = await getPlayer(ws);
+    const hooked = await Player.findOne({_id: msg.player});
+    if (!hooked) return;
+    const hook = await Hook.findOne({uid: msg.hook});
+    if (!hook) return;
+
+    if (hooked.hookState === 0) {
+        hooked.hookState = 1;
+    } else if (hooked.hookState === 1) {
+        hooked.hookSate = 2;
+    }
+    await hooked.save();
+
+    if (stateChange) {
+        await sendJsonToAllSessionMembers(ws, {
+            req: "print",
+            message: hooked.username + "'s hook state is now " + hooked.hookState,
+            headline: "Hook state"
+        }, session._id);
+    } else {
+        if (!hook.damaged) {
+            hook.hookedSurvivor = hooked._id;
+            await hook.save();
+            hookTimer(ws, hooked);
+        }
+    }
+
+    if (player.hookState === 2) {
+        await killPlayer(ws, hooked);
+    }
+}
+
+async function hookTimer(ws, player) {
+    setInterval(async function () {
+        const player = await Player.findOne({_id: player._id});
+        const hook = await Hook.find({hookedSurvivor: player._id});
+        if (hook) {
+            if (player.hookTimer >= 100) {
+                await hookPlayer(ws, {player: player._id, hook: hook.uid}, true)
+            } else {
+                player.hookTimer = player.hookTimer + 1;
+                await player.save();
+                hookTimer(ws, player);
+            }
+        }
+    }, 1000)
+}
+
+async function killPlayer(ws, player) {
+    player.isAlive = false;
+    const playerws = await getWsFromPlayer(player);
+    playerws.json({req: "dead"});
+
+    const hook = await Hook.findOne({hookedSurvivor: player._id});
+    hook.damaged = true;
+    await hook.save();
     await player.save();
-    generatorProgressTimer(ws, generator._id);
-    generatorSkillTimer(ws, generator);
-    const players = await Player.find({repairingGenerator: generator._id});
 
-    ws.json({
-        req: "startGeneratorRepair",
-        generator: generator.uid,
-        progress: generator.progress,
-        players: players.length
+    await sendJsonToAllSessionMembers(ws, {
+        req: "print",
+        headline: "Killed",
+        message: player.username + " was killed!"
     });
 }
 
-async function generatorProgressTimer(ws, generator) {
-    setTimeout(async function () {
-        const player = await getPlayer(ws);
-        const generator = await Generator.findOne({_id: generator});
-        if (player.repairingGenerator === generator) {
-            if (!generator.finished) {
+async function regGeneratorRepair(ws, msg) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (!await isSurvivor(ws)) return;
+    const player = await getPlayer(ws);
+    if (!player.isAlive) return;
+    const generator = await Generator.findOne({uid: msg.generator});
+    if (!generator) return;
+    if (!player) return;
+
+    if (generator.finished) {
+        player.repairingGenerator = undefined;
+        await player.save();
+        return;
+    }
+
+    if (player.repairingGenerator === undefined) {
+        player.repairingGenerator = generator._id;
+        generator.damaged = false;
+
+        await generator.save();
+        await player.save();
+
+        generatorSkillTimer(ws, generator);
+        const players = await Player.find({repairingGenerator: generator._id});
+
+        ws.json({
+            req: "startGeneratorRepair",
+            generator: generator.uid,
+            progress: generator.progress,
+            players: players.length
+        });
+    } else {
+        if (player.repairingGenerator === generator._id) {
+            const threeSecond = 1000 * 3;
+            const threeSecondsAgo = Date.now() - threeSecond;
+
+            if (player.lastRepairTime === undefined) {
                 generator.progress = generator.progress + 1;
-                generatorProgressTimer(ws, generator);
+                await generator.save();
+                player.lastRepairTime = Date.now();
+                await player.save();
+
+                const players = await Player.find({repairingGenerator: generator._id});
+                await sendJsonToAllMembersOnGen(ws, generator, {
+                    req: "startGeneratorRepair",
+                    generator: generator.uid,
+                    progress: generator.progress,
+                    players: players.length
+                });
+            } else {
+                if (player.lastRepairTime > threeSecondsAgo) {
+                    player.lastRepairTime = undefined;
+                    player.repairingGenerator = undefined;
+                    await player.save();
+
+                    const players = await Player.find({repairingGenerator: generator._id});
+                    await sendJsonToAllMembersOnGen(ws, generator, {
+                        req: "startGeneratorRepair",
+                        generator: generator.uid,
+                        progress: generator.progress,
+                        players: players.length
+                    });
+
+                    await ws.json({req: "endGeneratorRepair"});
+                } else {
+                    generator.progress = generator.progress + 1;
+                    await generator.save();
+                    player.lastRepairTime = Date.now();
+                    await player.save();
+                }
             }
         }
-    }, 1000);
+    }
 }
 
 async function generatorSkillTimer(ws, generator) {
@@ -206,6 +352,8 @@ async function genFailCheck(ws) {
 }
 
 async function damageGenerator(ws, msg) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (!await isKiller(ws)) return;
     const player = await getPlayer(ws);
     if (!player) return;
     const generator = await Generator.findOne({uid: msg.generator});
@@ -239,6 +387,7 @@ async function endGeneratorRepair(ws) {
 
 async function sendTerrorRadius(ws) {
     if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (!await isSurvivor(ws)) return;
 
     let killer = await getKiller(ws);
     let player = await getPlayer(ws);
@@ -299,6 +448,8 @@ async function changePlayerType(ws, msg) {
 }
 
 async function removeObstacle(ws, msg) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (!await isEntity(ws)) return;
     const session = await getSession(ws);
     switch (msg.type) {
         case "generator": {
@@ -322,7 +473,38 @@ async function removeObstacle(ws, msg) {
     await sendJsonToEntity(ws, {req: "reload"}, session._id);
 }
 
+async function finishSetup(ws, msg, setup) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (!await isEntity(ws)) return;
+    const session = await getSession(ws);
+    switch (msg.type) {
+        case "generator": {
+            const gen = await Generator.findOne({_id: msg.id});
+            gen.setup = setup;
+            await gen.save();
+        }
+            break;
+
+        case "hook": {
+            const hook = await Hook.findOne({_id: msg.id});
+            hook.setup = setup;
+            await hook.save();
+        }
+            break;
+
+        case "exitGate": {
+            const exit = await ExitGate.findOne({_id: msg.id});
+            exit.setup = setup;
+            await exit.save();
+        }
+            break;
+    }
+    await sendJsonToEntity(ws, {req: "reload"}, session._id);
+}
+
 async function setup(ws, msg) {
+    if (!await isAuth(ws)) return ws.json({req: "authstatus", status: 401});
+    if (!await isEntity(ws)) return;
     const session = await getSession(ws);
     var tk = makeToken(3, true, false, false);
 
@@ -666,6 +848,14 @@ async function getKiller(ws) {
     }
 }
 
+async function getWsFromPlayer(player) {
+    for (const cc of authCons) {
+        if (cc.player !== undefined)
+            if (cc.player._id === player._id)
+                return cc;
+    }
+}
+
 async function getSession(ws) {
     if (await isEntity(ws)) {
         const session = await Session.findOne({entity: ws.user._id});
@@ -759,6 +949,18 @@ async function isEntity(ws) {
     const session = await Session.findOne({entity: ws.user._id});
     if (!session) return false;
     return true;
+}
+
+async function isKiller(ws) {
+    const player = await getPlayer(ws);
+    return player.isKiller;
+
+}
+
+async function isSurvivor(ws) {
+    const player = await getPlayer(ws);
+    return player.isSurvivor;
+
 }
 
 async function getEntitySession(ws) {

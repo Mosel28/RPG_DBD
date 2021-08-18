@@ -14,12 +14,13 @@
 
 <body>
 
-<div class="root" id="entity">
+<div class="root" id="entity" v-cloak>
     <div class="notificationBoard" :style="messageTopStyle" @click="clearMessages">
         <h1>{{messageHeadline}}</h1>
         <h2>{{message}}</h2>
     </div>
     <button class="fixedBtn" v-if="!shown" @click="toggleQueue">Queue</button>
+    <button class="fixedBtn" style="top: 4rem" v-if="queueShown && isEntity" @click="window.location.replace('/setup')">Setup</button>
     <div v-if="shown" class="editbox">
         <div class="ct">
             <button v-if="!queueShown && !createGameShown || isEntity" class="fixedBtn" @click="toggleQueue">Close
@@ -57,7 +58,7 @@
                         </div>
                         <button @click="createToken">Create token</button>
                     </div>
-                    <button @click="startGame">Start game</button>
+                    <button v-if="isEntity" @click="startGame">Start game</button>
                     <button @click="quit">Quit</button>
                 </div>
             </div>
@@ -131,8 +132,38 @@
             <button onclick="clickSpamGenerator() " class="buttonGenerator ">Break</button>
         </div>
     </div>
+    <div v-if="isSurvivor && gameShown">
+        <div class="hookControllSurvivor">
+            <h2 style="margin: 1%;">Unhook</h2>
 
+            <div>
+                <div class="column" v-for="entry in hookedPlayer" style="width: fit-content; height: fit-content;">
+                    <button @click="unhook(entry._id) ">{{entry.name}}</button>
+                </div>
+                <input type="text" v-model="hookUid">
+            </div>
 
+        </div>
+
+        <div class="skillcheck">
+            <!--Skillchecks will must be done here-->
+            <h1>Skillchecks</h1>
+
+            <h1 id="nudge"></h1>
+
+            <div class="buttonHolder">
+                <canvas class="skillCheckPointer" width="300" height="300" id="skillCheckSucessArea"></canvas>
+                <input type="image" @click="clickSkillCheck" src="/assets/img/skillcheckPointer.png"
+                       class="skillCheckPointer" id="skillCheckPointer"/>
+            </div>
+        </div>
+        <div class="generatorControl">
+            <!--Doing the generator, or opening the gate-->
+            <h1>Generator Task</h1>
+            <div class="progressBar" id="progressBar"></div>
+            <Button id="btnRepair" @click="clickSpamGenerator" class="buttonGenerator">Repair</Button>
+        </div>
+    </div>
 </div>
 <script src="mainvue.js"></script>
 </body>

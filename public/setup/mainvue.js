@@ -47,16 +47,22 @@ var reg = new Vue({
             }
         },
         createHook: function () {
-            navigator.geolocation.getCurrentPosition(this.geoSuccess, this.geoError);
-            reg.ws.json({req: "setup", type: "hook", position:[this.latitude, this.longitude]});
+            this.updateGPS();
+            setTimeout(function (){
+                reg.ws.json({req: "setup", type: "hook", position:[this.latitude, this.longitude]});
+            }, 1000)
         },
         createGen: function () {
-            navigator.geolocation.getCurrentPosition(this.geoSuccess, this.geoError);
-            reg.ws.json({req: "setup", type: "generator", position:[this.latitude, this.longitude]});
+           this.updateGPS();
+            setTimeout(function (){
+                reg.ws.json({req: "setup", type: "generator", position:[this.latitude, this.longitude]});
+            }, 1000)
         },
         createExit: function () {
-            navigator.geolocation.getCurrentPosition(this.geoSuccess, this.geoError);
-            reg.ws.json({req: "setup", type: "exitGate", position:[this.latitude, this.longitude]});
+            this.updateGPS();
+            setTimeout(function (){
+                reg.ws.json({req: "setup", type: "exitGate", position:[this.latitude, this.longitude]});
+            }, 1000)
         },
         removeGate: function (id) {
             reg.ws.json({req: "removeObstacle", type: "exitGate", id: id});
@@ -73,6 +79,20 @@ var reg = new Vue({
         },
         geoError: function (error){
 
+        },
+        updateGPS: function (){
+            var geo_options = {
+                enableHighAccuracy: true,
+                maximumAge: 30000,
+                timeout: 27000
+            };
+            navigator.geolocation.getCurrentPosition(this.geoSuccess, this.geoError, geo_options);
+        },
+        finishSetup: function (type, id){
+            reg.ws.json({req: "finishSetup", type: type, id: id});
+        },
+        undoSetup: function (type, id){
+            reg.ws.json({req: "undoSetup", type: type, id: id});
         }
     }
 });

@@ -17,6 +17,10 @@ const player = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    hookTimer: {
+      type: Number,
+      default: 0
+    },
     repairingGenerator: {
         type: mongoose.Schema.Types.ObjectId,
         default: undefined
@@ -25,6 +29,11 @@ const player = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         default: undefined
     },
+    isAlive: {
+        type: Boolean,
+        default: true
+    },
+    lastRepairTime: Date,
     user: mongoose.Schema.Types.ObjectId
 });
 
