@@ -28,13 +28,37 @@ let generatorClickSpam = false; //true if clicked
 let notificationTimeout = 0;
 let notificationBox = document.getElementById("notification");
 let notificationBoxCaption = document.getElementById("caption");
-let notificationBoxMessage = document.getElementById("message")
+let notificationBoxMessage = document.getElementById("message");
+//Hooked Player
+let hookedPlayerList = [] //array of {name: 'Name'}
 
 
-/*
-Network stuff
-Usage: socket.json({data});
-*/
+Vue.component('entry-component', { //global
+    //Optionen
+    props: ['entry', 'player'], //binden, verwendbar wie ein Datenatribut
+    template: `
+        <div class="playerCard">
+            <button @click="select(entry.name) ">{{entry.name}}</button>
+        </div>
+    `,
+    methods: {
+        select(playerName) {
+            unhookPlayer(playerName);
+        }
+    }
+
+});
+window.vue = new Vue({
+        el: '#root',
+        data: {
+            player: hookedPlayerList
+        },
+
+    })
+    /*
+    Network stuff
+    Usage: socket.json({data});
+    */
 
 function messageHandler(msg) {
     console.log(msg.req);
@@ -54,14 +78,33 @@ function messageHandler(msg) {
             break
         case 'loadGame':
             initUi();
+            break;
+        case 'hooked':
+            hooked(msg.hookedPlayer);
+            break;
+        case 'unhooked':
+            unhooked(msg.hookedPlayer);
+            break;
     }
 }
+
+
 
 let socket = connectWs(messageHandler);
 
 
+//TEST 
+
+
+
 initUi();
 
+hooked({ name: 'Mindcollaps' })
+
+hooked({ name: 'Mindcollaps' })
+
+
+//Test Ende
 function initUi() {
     //Array of {name: playername}
     showNotification('Welcome to the Map', 'Map: Farm Besetze. Good Luck!')
@@ -71,6 +114,7 @@ function initUi() {
  * Constant push of geolocation
  */
 function pushGeoLocation() {
+
     console.log("Try to catch Geolocation");
     let startPos;
 
@@ -323,6 +367,9 @@ Push Messages
 */
 
 function showNotification(title, message) {
+    notificationBox = document.getElementById("notification");
+    notificationBoxCaption = document.getElementById("caption");
+    notificationBoxMessage = document.getElementById("message");
     clearMessages();
     notificationTimeout = 10;
     notificationBox.style.top = '0px';
@@ -348,3 +395,25 @@ function clearMessages() {
 }
 
 setInterval(resetMessageBoard, 1000);
+
+/*Player hooked Notification and Button to unhook
+ */
+function hooked(hookedPlayer) {
+    hookedPlayerList.push(hookedPlayer);
+    showNotification('Hooked', hookedPlayer + ' was hooked.');
+}
+
+function unhooked(hookedPlayer) {
+    hookedPlayerList = hookedPlayerList.filter(element => { return element.name != hookedPlayer })
+    showNotification('Hooked', hookedPlayer + ' was unhooked.');
+}
+
+function unhookPlayer(playerName) {
+    console.log(playerName)
+    socket.json({
+            req: 'unhook',
+            playerName: playerName,
+        })
+        //IF NO HOOK WAS SCANNED
+        // showNotification('Mistake', hookedPlayer + 'You have to scan the QR Code first before unhook.');
+}

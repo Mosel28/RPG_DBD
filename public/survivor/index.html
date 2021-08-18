@@ -20,6 +20,17 @@
             <h2 id="message">Nommit hooked</h2>
         </div>
 
+        <div class="hookControllSurvivor">
+            <h2 style="margin: 1%;">Unhook</h2>
+
+            <div class="column" v-for="entry in player" style="width: fit-content; height: fit-content;">
+                <entry-component v-bind:entry="entry" :entries="player">
+                </entry-component>
+            </div>
+
+        </div>
+
+
         <div class="skillcheck">
             <!--Skillchecks will must be done here-->
             <h1>Skillchecks</h1>
@@ -47,11 +58,7 @@
     </div>
     <script src="https://unpkg.com/vue">
     </script>
-    <script>
-        window.vue = new Vue({
-            el: '#root'
-        })
-    </script>
+
     <script src="./survivor.js"></script>
 </body>
 

@@ -168,18 +168,21 @@ body {
 }
 
 h1 {
+    font-size: larger;
     margin: 20px;
     left: 40px;
     color: white
 }
 
 h2 {
+    font-size: larger;
     margin: 20px;
     left: 40px;
     color: #CC2222;
 }
 
 h3 {
+    font-size: larger;
     margin: 20px;
     left: 40px;
     color: #992222;
@@ -300,6 +303,18 @@ button:focus {
     right: 0%;
     bottom: 35%;
     height: 40%;
+    border-style: dashed;
+    border-color: #5555;
+    border-width: 3px;
+}
+
+.hookControllSurvivor {
+    display: inline;
+    position: absolute;
+    bottom: 75%;
+    top: 15%;
+    left: 0%;
+    right: 0%;
     border-style: dashed;
     border-color: #5555;
     border-width: 3px;

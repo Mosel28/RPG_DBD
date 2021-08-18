@@ -44,24 +44,6 @@ Vue.component('entry-component', { //global
     }
 
 });
-/*
-Vue.component('hook-component', { //global
-    //Optionen
-    props: ['hook', 'hooks'], //binden, verwendbar wie ein Datenatribut
-    template: `
-        <div class="playerCard">
-            <button @click="select(hook.id) ">{{hook.id}}</button>
-        </div>
-    `,
-    methods: {
-        select(playerName) {
-            selectPlayerToHook(playerName);
-        }
-    }
-
-});
-For Entity
-*/
 window.vue = new Vue({
     el: '#root',
     data: {
