@@ -50,6 +50,13 @@
         <div class="generatorControl">
             <!--Doing the generator, or opening the gate-->
             <h1>Generator Task</h1>
+            <div class="column">
+                <div class="nfcControll">
+                    <input type="text" id="generatorNumber" class="textFieldHookNumber ">
+                    <button onclick="selectGenerator(document.getElementById('generatorNumber'))" style="">OK</button>
+                </div>
+            </div>
+
             <div class="progressBar" id="progressBar"></div>
             <Button id="btnRepair" onclick="clickSpamGenerator()" class="buttonGenerator">Repair</Button>
         </div>

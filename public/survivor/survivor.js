@@ -89,6 +89,9 @@ function messageHandler(msg) {
         case 'unhooked':
             unhooked(msg.hookedPlayer);
             break;
+        case 'notification':
+            showNotification(msg.caption, msg.message);
+            break;
     }
 }
 
@@ -324,14 +327,25 @@ function clickSkillCheck() {
 /*
 Generator Task
 */
+function selectGenerator(tfGeneratorID) {
+
+    socket.json({
+        req: "regGeneratorRepair",
+        generator: tfGeneratorID.value
+    })
+
+}
+
 function initGeneratorTask(pGeneratorID, pGeneratorProgress, pPlayerFaktor) { //if NFC chick scanned, plz here enter @Noah
+    showNotification('Generator', 'Start repairing!')
     generatorID = pGeneratorID;
     generatorProgress = pGeneratorProgress;
     generatorTaskPlayerFaktor = pPlayerFaktor;
 
     generatorTimeOut = 10;
     socket.json({
-        req: "regGeneratorRepair"
+        req: "regGeneratorRepair",
+        generator: generatorID
     })
 
 }
@@ -345,22 +359,27 @@ function updateGeneratorTask() {
     if (generatorID == -1 || generatorTimeOut <= -1)
         return;
 
-    if (generatorTimeOut == 0)
+    if (generatorTimeOut == 0) {
+        showNotification('Generator', 'You have stopped repairing');
         socket.json({
-            req: "endGeneratorRepair"
+            req: "endGeneratorRepair",
+            generator: generatorID
         })
+    }
 
     if (generatorClickSpam) {
         generatorProgress = generatorProgress + generatorTaskPlayerFaktor;
         updateGeneratorProgress();
         generatorClickSpam = false;
-        generatorTimeOut = 5;
+        generatorTimeOut = 3;
         socket.json({
-            req: "regGeneratorRepair"
+            req: "regGeneratorRepair",
+            generator: generatorID
         })
     } else {
         socket.json({
-            req: "endGeneratorRepair"
+            req: "endGeneratorRepair",
+            generator: generatorID
         })
         generatorTimeOut--;
     }
@@ -372,8 +391,10 @@ setInterval(updateGeneratorTask, 500);
 
 
 if ("geolocation" in navigator) {
+    showNotification('GPS', 'Your GPS is Functional')
     console.warn("GPS Funktioniert!")
 } else {
+    showNotification('Error', 'Your GPS is broken. Fix it.')
     console.warn("GPS Funktioniert NICHT!")
 }
 
@@ -416,7 +437,7 @@ setInterval(resetMessageBoard, 1000);
  */
 function hooked(hookedPlayer) {
     hookedPlayerList.push(hookedPlayer);
-    showNotification('Hooked', hookedPlayer + ' was hooked.');
+    showNotification('Hooked', hookedPlayer.name + ' was hooked.');
 }
 
 function unhooked(hookedPlayer) {
